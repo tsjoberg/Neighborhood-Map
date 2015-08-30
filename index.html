@@ -18,7 +18,29 @@
     </style>
   </head>
   <body>
-  <div id="panel" style="margin-left: 52px">
+
+  <div class="container">
+    <div class="row"><h2 align="center">Neighborhood Map for Chicago's Magnificient Mile</h2><hr></div>
+    <div class="row">
+        <div id="panel" style="margin-left: 52px">
+          <button id="hotel" onclick="drop(this.id)">Hotels</button>
+          <button id="mall" onclick="drop(this.id)">Malls</button>
+          <button id="food" onclick="drop(this.id)">Food</button>
+          <button id="landmark" onclick="drop(this.id)">Landmarks</button>
+          <button id="retail" onclick="drop(this.id)">Retail</button>
+          <button id="bank" onclick="drop(this.id)">Banks</button>
+          <span>Search: <input id="autocomplete" data-bind="value: search, valueUpdate: 'afterKeyDown'"/>
+          </span>
+      </div>
+      <div id="map" class="row" style="width:1000px; height:700px"></div>
+        <div class="col-md-12">
+        <script src="https://maps.googleapis.com/maps/api/js?signed_in=true&callback=initMap"
+        async defer></script>
+      </div>
+    </div>
+  </div>
+
+<!--  <div id="panel" style="margin-left: 52px">
     <button id="hotel" onclick="drop(this.id)">Hotels</button>
     <button id="mall" onclick="drop(this.id)">Malls</button>
     <button id="food" onclick="drop(this.id)">Food</button>
@@ -31,5 +53,6 @@
   <div id="map"></div>
   <script src="https://maps.googleapis.com/maps/api/js?signed_in=true&callback=initMap"
         async defer></script>
+      -->
   </body>
 </html>

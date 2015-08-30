@@ -35,14 +35,15 @@ var BANK_TYPE = 'bank';
 var ALL_TYPE = 'all';
 var RESTAURANT_TYPE = 'food';
 
-var centerMapCoordinates = {lat: 41.89535, lng: -87.62432};
+//41.894829,-87.6242173
+var centerMapCoordinates = {lat: 41.894829, lng: -87.6242173};
 var allPlaces;
 var markers = [];
 var map;
 
 function initMap() {
 	map = new google.maps.Map(document.getElementById('map'), {
-		zoom: 15,
+		zoom: 16,
 		center: centerMapCoordinates
 	});
 	// all interested locations markers to be dropped when map is initiated
@@ -83,6 +84,18 @@ function getVisibleData(type) {
 		}
 	}
 	return allData;
+}
+
+function getVisibleSearchData(name, type) {
+	var allOfThisType = getVisibleData(type);
+	for (var one in allOfThisType) {
+		if (allOfThisType[one].name == name) {
+			allOfThisType[one].visible = true;
+		} else {
+			allOfThisType[one].visible = false;
+		}
+	}
+	return allOfThisType;
 }
 
 function setVisibleMarkers(places) {
@@ -524,8 +537,8 @@ $(document).ready(function() {
 					break;
 				}
 			}
-
-			displaySpecificMarkers([currentData]);
+			setVisibleMarkers(getVisibleData(currentData.type));
+			displayMarkers(getVisibleSearchData(currentData.name, currentData.type));
 			/*
 			if (currentData != null) {
 				var marker = new google.maps.Marker({
