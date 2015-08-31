@@ -36,18 +36,41 @@ var ALL_TYPE = 'all';
 var RESTAURANT_TYPE = 'food';
 
 //41.894829,-87.6242173
-var centerMapCoordinates = {lat: 41.894829, lng: -87.6242173};
+var centerMapCoordinates = {lat: 41.894271, lng: -87.624148};
 var allPlaces;
 var markers = [];
 var map;
+
+// for outline of the neighborhood
+var neighborhoodCoordinates = [{lat: 41.888878, lng: -87.624786},
+								{lat: 41.889249, lng: -87.624695},
+								{lat: 41.889317, lng: -87.624854},
+								{lat: 41.900783, lng: -87.624485},
+								{lat: 41.900821, lng: -87.623740},
+								{lat: 41.889709, lng: -87.623765},
+								{lat: 41.889307, lng: -87.623586},
+								{lat: 41.889230, lng: -87.623868},
+								{lat: 41.888810, lng: -87.624048},
+								{lat: 41.888878, lng: -87.624786}];
 
 function initMap() {
 	map = new google.maps.Map(document.getElementById('map'), {
 		zoom: 16,
 		center: centerMapCoordinates
+
 	});
 	// all interested locations markers to be dropped when map is initiated
 	drop(ALL_TYPE);
+
+	var path = new google.maps.Polyline({
+	    path: neighborhoodCoordinates,
+	    geodesic: true,
+	    strokeColor: '#FF69B4',
+	    strokeOpacity: 1.0,
+	    strokeWeight: 2
+	});
+
+  	path.setMap(map);
 }
 
 function drop(buttonId) {
