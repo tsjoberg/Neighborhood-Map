@@ -36,11 +36,12 @@ var ALL_TYPE = 'all';
 var RESTAURANT_TYPE = 'food';
 
 //41.894829,-87.6242173
-var centerMapCoordinates = {lat: 41.894271, lng: -87.624148};
 var allPlaces;
 var markers = [];
 var map;
 
+// center the map at the middle(ish) if Magnificent Mile
+var centerMapCoordinates = {lat: 41.894271, lng: -87.624148};
 // for outline of the neighborhood
 var neighborhoodCoordinates = [{lat: 41.888878, lng: -87.624786},
 								{lat: 41.889249, lng: -87.624695},
