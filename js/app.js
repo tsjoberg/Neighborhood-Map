@@ -1,43 +1,35 @@
 /*
-Neighborhood Map - Magnificient Mile, Chicago
-
-Latitude: 41.89535°N
-Longitude: 87.62432°W
-
-Landmarks:
-
-Retail:
-
-Banks:
-
-Malls:
-
-Hotels and Dining:
-
-
+ * The app.js file defines the neighborhood map. It contains interested
+ * location coordinates. Google map is initialized and markers are set
+ * to the coordinates. There is search functionality on the added
+ * markers. Yelp and Wiki apis are to be linked to information windows
+ * that appear when a marker is clicked.
+ *
+ * Frontend Web Developer Nanodegee, Udacity
+ * Project 5
+ * @date May Aug31st, 2015
+ * @author Samata Bulusu
 */
 
-// there could be more parameters added to this constructor
-// to divide and conquer the specific api details
-// and also to contain the standard html that needs to go with the
-// infowindow
-var Place = function(name, position, content) {
-	this.name = name;
-	this.position = position;
-	this.content = content;
-}
-
+// constant for hotel type
 var HOTEL_TYPE = 'hotel';
+// constant for mall type
 var MALL_TYPE = 'mall';
+// constant for landmark tyoe
 var LANDMARK_TYPE = 'landmark';
+// constant for retail type
 var RETAIL_TYPE = 'retail';
+// constant for bank type
 var BANK_TYPE = 'bank';
-var ALL_TYPE = 'all';
+// constant for restaurant type
 var RESTAURANT_TYPE = 'food';
-
-//41.894829,-87.6242173
+// constant for all type
+var ALL_TYPE = 'all';
+// an array to contain all interested locations
 var allPlaces;
+// an array to contain all markers
 var markers = [];
+// handle to the google map
 var map;
 
 // center the map at the middle(ish) if Magnificent Mile
@@ -54,6 +46,7 @@ var neighborhoodCoordinates = [{lat: 41.888878, lng: -87.624786},
 								{lat: 41.888810, lng: -87.624048},
 								{lat: 41.888878, lng: -87.624786}];
 
+// initialize the google map
 function initMap() {
 	map = new google.maps.Map(document.getElementById('map'), {
 		zoom: 16,
@@ -62,7 +55,7 @@ function initMap() {
 	});
 	// all interested locations markers to be dropped when map is initiated
 	drop(ALL_TYPE);
-
+	// draw a polyline for magnificent mile in google maps
 	var path = new google.maps.Polyline({
 	    path: neighborhoodCoordinates,
 	    geodesic: true,
@@ -70,10 +63,10 @@ function initMap() {
 	    strokeOpacity: 1.0,
 	    strokeWeight: 2
 	});
-
   	path.setMap(map);
 }
 
+// drop markers when buttons are clicked
 function drop(buttonId) {
 	if (buttonId == HOTEL_TYPE) {
 		setVisibleMarkers(getVisibleData(HOTEL_TYPE));
@@ -98,6 +91,8 @@ function drop(buttonId) {
 	}
 }
 
+// set all the data's visible property for this'type' to true
+// all other types are set to visible false
 function getVisibleData(type) {
 	var allData = getAllData();
 	for (var data in allData) {
@@ -110,6 +105,8 @@ function getVisibleData(type) {
 	return allData;
 }
 
+// get all data marking visible to true for this 'name' and 'type'
+// all others are set to visible false
 function getVisibleSearchData(name, type) {
 	var allOfThisType = getVisibleData(type);
 	for (var one in allOfThisType) {
@@ -122,6 +119,8 @@ function getVisibleSearchData(name, type) {
 	return allOfThisType;
 }
 
+// using allData's visible property, match on the place(s)
+// and set the marker to be visible
 function setVisibleMarkers(places) {
 	for (place in places) {
 		for (var marker in markers) {
@@ -131,6 +130,13 @@ function setVisibleMarkers(places) {
 	}
 }
 
+// hope to be the header handle to be displayed in the information window
+var $header = $('header');
+// hope to be the wiki data handle to be displayed in the information window
+var $wiki = $('#wiki');
+// hope to be the yelp data handle to be displayed in the information window
+
+//display markers for the asked places
 function displayMarkers(places) {
 	clearMarkers();
 	for (var i = 0; i < places.length; i++) {
@@ -142,13 +148,24 @@ function displayMarkers(places) {
 							title: currentPlace.name
 							});
 		marker.setVisible(currentPlace.visible);
-		// TODO - make that markers drop to the map with a delay
+		// TODO - version 2 - make that markers drop to the map with a delay
 		//window.setTimeout(function() { markers.push(marker); }, i * 200);
 		markers.push(marker);
 
+		//console.log("header = " + $header);
+		//console.log("wiki = " + $wiki);
+		//console.log("content in marker = " + currentPlace.content);
 		var infoWindow = new google.maps.InfoWindow({
 							content: currentPlace.content
+						});
+
+		/*var content = "<div style = 'width:200px;min-height:100px'>" + currentPlace.name + "<hr></div>";
+		var data = callYelp(currentPlace.name, function(callback) {
+			console.log("-----------------------------------" + callback.mobile_url);
+			$testID.text = "<p>" + "Mobile Url = " + callback.mobile_url + "</p>"
 		});
+		//console.log("Data from YELP call = " + data.mobile_url);
+		*/
 
 		// anonymous function to help tag proper content window to each marker
 		google.maps.event.addListener(marker, 'click', function(handle, pop) {
@@ -156,11 +173,83 @@ function displayMarkers(places) {
 				pop.open(map, handle);
 			};
 		}(marker, infoWindow));
-	}
-	console.log("Number of markers = " + markers.length);
 
+	}
+	//console.log("Number of markers = " + markers.length);
 }
 
+// consumer key for yelp
+var consumerKey = "DnQn7xnOmHlQHpd80U2bEw";
+// consumer secret for yelp
+var consumerSecret = "PSGT6NZ978aecOU5Y6ElrEbKZMc";
+// consumer token for yelp
+var token = "aEKlZtLMH0rapH_-K7O4U6A5tGFW6fXT";
+// consumer token secret for yelp
+var tokenSecret = "bt64O7Xwt2qJvWACoC3UMOuqIDg";
+// yelp url to send search request to
+var yelpURL = "http://api.yelp.com/v2/search/";
+
+//var restaurant = "The Purple Pig";
+//var city = "Chicago";
+
+// array for our consumer secret and token secret
+var accessor = {
+  consumerSecret: consumerSecret,
+  tokenSecret: tokenSecret
+};
+
+var yelpResults = [];
+var mobile_url;
+
+// yelp api call
+// works as a prototype. needs to be hooked to display retrieved data
+// in the information window
+function callYelp(business, callback) {
+	var parameters = [];
+	parameters.push(['term', business]);
+	parameters.push(['location', "Chicago"]);
+	parameters.push(['callback', 'cb']);
+	parameters.push(['oauth_consumer_key', consumerKey]);
+	parameters.push(['oauth_consumer_secret', consumerSecret]);
+	parameters.push(['oauth_token', token]);
+	parameters.push(['oauth_signature_method', 'HMAC-SHA1']);
+	var message = {
+	  'action': 'http://api.yelp.com/v2/search',
+	  'method': 'GET',
+	  'parameters': parameters
+	};
+	OAuth.setTimestampAndNonce(message);
+	OAuth.SignatureMethod.sign(message, accessor);
+	var parameterMap = OAuth.getParameterMap(message.parameters);
+	parameterMap.oauth_signature = OAuth.percentEncode(parameterMap.oauth_signature)
+
+	$.ajax({
+	  'url': message.action,
+	  'data': parameterMap,
+	  'cache': true,
+	  'dataType': 'jsonp',
+	  'jsonpCallback': 'cb',
+	  'success': function(data, textStats, XMLHttpRequest) {
+			//var el = document.getElementById('results');
+			//console.log(data.businesses[0].mobile_url);
+			//yelpResults.push({"url" : data.businesses[0].mobile_url});
+			//console.log("********************* url = " + data.businesses[0].mobile_url);
+			var results = [];
+			mobile_url = data.businesses[0].mobile_url;
+			results.mobile_url = data.businesses[0].mobile_url;
+			//$testID.text = data.businesses[0].mobile_url;
+			//console.log("$testID = " + $testID.text);
+			//console.log("results.mobile_url = " + results.mobile_url);
+			callback(results);
+			//console.log("first memeber of the array = " + data.businesses[0]);
+		  	//console.log("mobile_url = " + data.businesses[0].mobile_url);
+	    }
+		}).fail(function(XMLHttpRequest, status, error) {
+			console.log("Yelp! Yelp! Error from YELP!  " + restaurant);
+	});
+}
+
+// clear all markers by setting them to null
 function clearMarkers() {
 	for (var i = 0; i < markers.length; i++) {
 		markers[i].setMap(null);
@@ -168,332 +257,8 @@ function clearMarkers() {
 	markers = [];
 }
 
-function getSearchableData() {
-	var searchableData = [];
-	for (var key in neighborhoodMarkers) {
-		//console.log("key = " +  key);
-		var place = neighborhoodMarkers[key];
-		for (var j = 0; j < place.length; j++) {
-			//console.log(place[j].name);
-			searchableData = searchableData.concat(place[j].name);
-		}
-	}
-	return searchableData;
-}
-
-// for this version of implementation, name has to be unique and is our handle to
-// getting at the correct object
-function getAllData() {
-	var allData = [
-		{
-			name: "The Drake Hotel",
-			latitude: 41.900401,
-			longitude: -87.623364,
-			content: "<div style = 'width:200px;min-height:40px'>The Drake Hotel</div>",
-			visible: true,
-			type: HOTEL_TYPE
-		},
-		{
-			name: "West Michigan Avenue",
-			latitude: 41.89006,
-			longitude: -87.62420,
-			content: "<div style = 'width:200px;min-height:40px'>West Michigan Avenue</div>",
-			visible: true,
-			type: HOTEL_TYPE
-		},
-		{
-			name: "Four Seasons Hotel",
-			latitude: 41.89934,
-			longitude: -87.62514,
-			content: "<div style = 'width:200px;min-height:40px'>Four Seasons Hotel</div>",
-			visible: true,
-			type: HOTEL_TYPE
-		},
-		{
-			name: "Ritz-Carlton Chicago",
-			latitude: 41.898021,
-			longitude: -87.622916,
-			content: "<div style = 'width:200px;min-height:40px'>Ritz-Carlton Chicago</div>",
-			visible: true,
-			type: HOTEL_TYPE
-		},
-		{
-			name: "Park Hyatt Chicago",
-			latitude: 41.89706,
-			longitude: -87.624992,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: HOTEL_TYPE
-		},
-		{
-			name: "Warwick Allerton Hotel",
-			latitude: 41.8951737,
-			longitude: -87.623672,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: HOTEL_TYPE
-		},
-		{
-			name: "Omni Chicago Hotel",
-			latitude: 41.8946608,
-			longitude: -87.6248416,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: HOTEL_TYPE
-		},
-		{
-			name: "Hotel Inter-Continental Chicago",
-			latitude: 41.8913023,
-			longitude: -87.6235601,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: HOTEL_TYPE
-		},
-		{
-			name: "The Palmolive Building",
-			latitude: 41.8997926,
-			longitude: -87.6233398,
-			content: "<div style = 'width:200px;min-height:40px'>The Palmolive Building Landmark</div>",
-			visible: true,
-			type: LANDMARK_TYPE
-		},
-		{
-			name: "Drake Hotel Landmark",
-			latitude: 41.900401,
-			longitude: -87.623364,
-			content: "<div style = 'width:200px;min-height:40px'>The Drake Hotel Landmark</div>",
-			visible: true,
-			type: LANDMARK_TYPE
-		},
-		{
-			name: "Old Chicago Water Tower",
-			latitude: 41.8971797,
-			longitude: -87.6243939,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: LANDMARK_TYPE
-		},
-		{
-			name: "Tribune Tower",
-			latitude: 41.8904213,
-			longitude: -87.623588,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: LANDMARK_TYPE
-		},
-		{
-			name: "Michigan Avenue Bridge",
-			latitude: 41.8905111,
-			longitude: -87.6244856,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: LANDMARK_TYPE
-		},
-		{
-			name: "Site of Old Fort Dearborn",
-			latitude: 41.8879019,
-			longitude: -87.6240778,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: LANDMARK_TYPE
-		},
-		{
-			name: "John Hancock Center",
-			latitude: 41.8987699,
-			longitude: -87.6229168,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: LANDMARK_TYPE
-		},
-		{
-			name: "One Magnificient Mile",
-			latitude: 41.9004747,
-			longitude: -87.6246925,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: LANDMARK_TYPE
-		},
-		{
-			name: "Bloomingdale's",
-			latitude: 41.899638,
-			longitude: -87.625613,
-			content: "<div style = 'width:200px;min-height:40px'>Bloomingdale's</div>",
-			visible: true,
-			type: RETAIL_TYPE
-		},
-		{
-			name: "Burberry",
-			latitude: 41.8936109,
-			longitude: -87.62389,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: RETAIL_TYPE
-		},
-		{
-			name: "Chanel Boutique",
-			latitude: 41.8989299,
-			longitude: -87.6249675,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: RETAIL_TYPE
-		},
-		{
-			name: "Coach",
-			latitude: 41.8931504,
-			longitude: -87.6237321,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: RETAIL_TYPE
-		},
-		{
-			name: "Louis Vuitton",
-			latitude: 41.899891,
-			longitude: -87.623854,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: RETAIL_TYPE
-		},
-		{
-			name: "Tumi",
-			latitude: 41.8985519,
-			longitude: -87.6245748,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: RETAIL_TYPE
-		},
-		{
-			name: "Saks Fifth Avenue",
-			latitude: 41.8955436,
-			longitude: -87.6242948,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: RETAIL_TYPE
-		},
-		{
-			name: "Tiffany & Co.",
-			latitude: 41.895922,
-			longitude: -87.624644,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: RETAIL_TYPE
-		},
-		{
-			name: "Cartier",
-			latitude: 41.893637,
-			longitude: -87.624655,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: RETAIL_TYPE
-		},
-		{
-			name: "H2O Plus Inc",
-			latitude: 41.8929245,
-			longitude: -87.6246406,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: RETAIL_TYPE
-		},
-		{	name: "Water Tower Place",
-			latitude: 41.8979303,
-			longitude: -87.6228927,
-			content: "<div style = 'width:200px;min-height:40px'>Water Tower Place</div>",
-			visible: true,
-			type: MALL_TYPE
-		},
-		{
-			name: "The Shops at North Bridge",
-			latitude: 41.891432,
-			longitude: -87.624808,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: MALL_TYPE
-		},
-		{
-			name: "900 North Michigan Avenue",
-			latitude: 41.899641,
-			longitude: -87.625122,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: MALL_TYPE
-		},
-		{
-			name: "JP Morgan Chase",
-			latitude: 41.8872977,
-			longitude: -87.6240254,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: BANK_TYPE
-		},
-		{
-			name: "Citibank",
-			latitude: 41.8863868,
-			longitude: -87.6238476,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: BANK_TYPE
-		},
-		{
-			name: "Bank of America",
-			latitude: 41.8911024,
-			longitude: -87.624805,
-			content: "<div style = 'width:200px;min-height:40px'>Bank of America</div>",
-			visible: true,
-			type: BANK_TYPE
-		},
-		{
-			name: "The Purple Pig",
-			latitude: 41.8911214,
-			longitude: -87.6246107,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: RESTAURANT_TYPE
-		},
-		{
-			name: "Nomi Restaurant",
-			latitude: 41.8969702,
-			longitude: -87.62506,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: RESTAURANT_TYPE
-		},
-		{
-			name: "Bandera",
-			latitude: 41.8918882,
-			longitude: -87.6238574,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: RESTAURANT_TYPE
-		},
-		{
-			name: "The Signature Room at the 95th",
-			latitude: 41.8986397,
-			longitude: -87.6227539,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: RESTAURANT_TYPE
-		},
-		{
-			name: "Grand Lux Cafe",
-			latitude: 41.8945098,
-			longitude: -87.6249427,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: RESTAURANT_TYPE
-		},
-		{
-			name: "Foodlife",
-			latitude: 41.8980164,
-			longitude: -87.6236208,
-			content: "<div style = 'width:200px;min-height:40px'></div>",
-			visible: true,
-			type: RESTAURANT_TYPE
-		}
-
-
-		];
-	return allData;
-}
-
+// the locations name is the keyword on which our search works
+// this method call returns an array of our interested locations names
 function getSearchFriendlyData() {
 	var allData = getAllData();
 	var searchFriendly = [];
@@ -503,54 +268,82 @@ function getSearchFriendlyData() {
 	return searchFriendly;
 }
 
+// our knockout obervable object
+function Location(name, latitude, longitude, content, visible, type) {
+	this.name = ko.observable(name);
+	this.latitude = ko.observable(latitude);
+	this.longitude = ko.observable(longitude);
+	this.content = ko.observable(content);
+	this.visible = ko.observable(visible);
+	this.type = ko.observable(type);
+	var wikiURL = "https://en.wikipedia.org/w/api.php?action=opensearch&search=" + name + ",Chicago&format=json&callback=wikiCallback";
+	console.log("wiki url = " + wikiURL);
+    // jsonp does not have error object hence timeout needs to be set this way
+    //var wikiRequestTimeout = setTimeout(function() {
+    //}, 8000);
 
-$(document).ready(function() {
+    $.ajax({
+        url: wikiURL,
+        dataType: "jsonp",
+        success: function wikiCallback(data) {
+        	//console.log("data from wiki = " + data);
+            var articleName = data[0];
+            console.log("article name = " + articleName);
+            $('wiki').text = articleName;
+            //wikiCallback(article);
+            //clearTimeout(wikiRequestTimeout);
+        },
+        error: function() {
+        	// do some logging
+        	console.log("failed wiki request for + " + name);
+        }
+    });
 
-	function Location(name, latitude, longitude, content, visible, type) {
-		this.name = ko.observable(name);
-		this.latitude = ko.observable(latitude);
-		this.longitude = ko.observable(longitude);
-		this.content = ko.observable(content);
-		this.visible = ko.observable(visible);
-		this.type = ko.observable(type);
+
+}
+
+// our view model for knockour js
+var viewModel = {
+	locations: ko.observableArray([]),
+	search: ko.observable('')
+	};
+// search on the names adn filter on the matches as the user types the search text
+viewModel.firstMatch = ko.dependentObservable(function() {
+	var search = this.search().toLowerCase();
+	if (!search) {
+		return this.locations();
+	} else {
+		return ko.utils.arrayFilter(this.locations(), function(location){
+			//var val = location.name().toLowerCase().indexOf(search) !== -1
+			//console.log("val = " + val);
+			return location.name().toLowerCase().indexOf(search) !== -1;
+		});
 	}
 
-	var viewModel = {
-		locations: ko.observableArray([]),
-		search: ko.observable('')
-	};
+}, viewModel);
 
-	viewModel.firstMatch = ko.dependentObservable(function() {
-		var search = this.search().toLowerCase();
-		if (!search) {
-			return this.locations();
-		} else {
-			return ko.utils.arrayFilter(this.locations(), function(location){
-				//item.Name().toLowerCase().indexOf(filter) !== -1
-				//var val = location.name().toLowerCase().indexOf(search) !== -1
-				return location.name().toLowerCase().indexOf(search) !== -1;
-			});
-		}
+// our obervable mapped location data
+var mappedData = ko.utils.arrayMap(getAllData(), function(item) {
+	console.log("mapped data's content = " + item.content);
+	return new Location(item.name, item.latitude, item.longitude, item.content, item.visible, item.type);
+});
 
-	}, viewModel);
+viewModel.locations(mappedData);
 
-	var mappedData = ko.utils.arrayMap(getAllData(), function(item) {
-		return new Location(item.name, item.latitude, item.longitude, item.content, item.visible, item.type);
-	});
-
-	viewModel.locations(mappedData);
-
+$(document).ready(function() {
+	// apply the knockour bindings
     ko.applyBindings(viewModel);
 
-    // autocomplete widget implementation for our searchable points of interest
+    // autocomplete jqueryui widget implementation for our searchable points of interest
     $( "#autocomplete" ).autocomplete({
  		source: getSearchFriendlyData()
 	});
 
     // when enter key is pressed, we grab the user selection
     $('#autocomplete').on('autocompleteselect', function(e, ui) {
+    	// 13 == enter key
     	if (e.which == 13) {
-			console.log("ui gives: " + ui.item.label);
+			//console.log("ui gives: " + ui.item.label);
 			//get the proper object
 			var allData = getAllData();
 			var currentData;
@@ -561,34 +354,326 @@ $(document).ready(function() {
 					break;
 				}
 			}
+			// set visible on all data objects of this 'type'
 			setVisibleMarkers(getVisibleData(currentData.type));
+			// first set visible on data object of this 'type' and 'name'
+			// then set visible on that marker to true and all other markers to 'false'
 			displayMarkers(getVisibleSearchData(currentData.name, currentData.type));
-			/*
-			if (currentData != null) {
-				var marker = new google.maps.Marker({
-						position: new google.maps.LatLng(currentData.latitude, currentData.longitude),
-						map: map,
-						animation: google.maps.Animation.DROP
-						});
-
-				var infoWindow = new google.maps.InfoWindow({
-									content: currentData.content
-				});
-
-				marker.addListener('click', function() {
-			    	infoWindow.open(map, marker);
-  				});
-			}
-
-*/
-
-			//link a marker to it
-			//dropSearchedMarker()
     	}
     });
 });
 
+// the generic string for information window
+var htmlContentString = "<div style = 'width:200px;min-height:40px'>" +
+						"<h5 id='header'></h5><hr>" +
+						"<p id='wiki'></p><hr></div>";
 
-
-
-
+// all the data to be displayed by the markers
+function getAllData() {
+	var allData = [
+		{
+			name: "The Drake Hotel",
+			latitude: 41.900401,
+			longitude: -87.623364,
+			content: htmlContentString,
+			visible: true,
+			type: HOTEL_TYPE
+		},
+		{
+			name: "West Michigan Avenue",
+			latitude: 41.89006,
+			longitude: -87.62420,
+			content: htmlContentString,
+			visible: true,
+			type: HOTEL_TYPE
+		},
+		{
+			name: "Four Seasons Hotel",
+			latitude: 41.89934,
+			longitude: -87.62514,
+			content: htmlContentString,
+			visible: true,
+			type: HOTEL_TYPE
+		},
+		{
+			name: "Ritz-Carlton Chicago",
+			latitude: 41.898021,
+			longitude: -87.622916,
+			content: htmlContentString,
+			visible: true,
+			type: HOTEL_TYPE
+		},
+		{
+			name: "Park Hyatt Chicago",
+			latitude: 41.89706,
+			longitude: -87.624992,
+			content: htmlContentString,
+			visible: true,
+			type: HOTEL_TYPE
+		},
+		{
+			name: "Warwick Allerton Hotel",
+			latitude: 41.8951737,
+			longitude: -87.623672,
+			content: htmlContentString,
+			visible: true,
+			type: HOTEL_TYPE
+		},
+		{
+			name: "Omni Chicago Hotel",
+			latitude: 41.8946608,
+			longitude: -87.6248416,
+			content: htmlContentString,
+			visible: true,
+			type: HOTEL_TYPE
+		},
+		{
+			name: "Hotel Inter-Continental Chicago",
+			latitude: 41.8913023,
+			longitude: -87.6235601,
+			content: htmlContentString,
+			visible: true,
+			type: HOTEL_TYPE
+		},
+		{
+			name: "The Palmolive Building",
+			latitude: 41.8997926,
+			longitude: -87.6233398,
+			content: htmlContentString,
+			visible: true,
+			type: LANDMARK_TYPE
+		},
+		{
+			name: "Drake Hotel Landmark",
+			latitude: 41.900401,
+			longitude: -87.623364,
+			content: htmlContentString,
+			visible: true,
+			type: LANDMARK_TYPE
+		},
+		{
+			name: "Old Chicago Water Tower",
+			latitude: 41.8971797,
+			longitude: -87.6243939,
+			content: htmlContentString,
+			visible: true,
+			type: LANDMARK_TYPE
+		},
+		{
+			name: "Tribune Tower",
+			latitude: 41.8904213,
+			longitude: -87.623588,
+			content: htmlContentString,
+			visible: true,
+			type: LANDMARK_TYPE
+		},
+		{
+			name: "Michigan Avenue Bridge",
+			latitude: 41.8905111,
+			longitude: -87.6244856,
+			content: htmlContentString,
+			visible: true,
+			type: LANDMARK_TYPE
+		},
+		{
+			name: "Site of Old Fort Dearborn",
+			latitude: 41.8879019,
+			longitude: -87.6240778,
+			content: htmlContentString,
+			visible: true,
+			type: LANDMARK_TYPE
+		},
+		{
+			name: "John Hancock Center",
+			latitude: 41.8987699,
+			longitude: -87.6229168,
+			content: htmlContentString,
+			visible: true,
+			type: LANDMARK_TYPE
+		},
+		{
+			name: "One Magnificient Mile",
+			latitude: 41.9004747,
+			longitude: -87.6246925,
+			content: htmlContentString,
+			visible: true,
+			type: LANDMARK_TYPE
+		},
+		{
+			name: "Bloomingdale's",
+			latitude: 41.899638,
+			longitude: -87.625613,
+			content: htmlContentString,
+			visible: true,
+			type: RETAIL_TYPE
+		},
+		{
+			name: "Burberry",
+			latitude: 41.8936109,
+			longitude: -87.62389,
+			content: htmlContentString,
+			visible: true,
+			type: RETAIL_TYPE
+		},
+		{
+			name: "Chanel Boutique",
+			latitude: 41.8989299,
+			longitude: -87.6249675,
+			content: htmlContentString,
+			visible: true,
+			type: RETAIL_TYPE
+		},
+		{
+			name: "Coach",
+			latitude: 41.8931504,
+			longitude: -87.6237321,
+			content: htmlContentString,
+			visible: true,
+			type: RETAIL_TYPE
+		},
+		{
+			name: "Louis Vuitton",
+			latitude: 41.899891,
+			longitude: -87.623854,
+			content: htmlContentString,
+			visible: true,
+			type: RETAIL_TYPE
+		},
+		{
+			name: "Tumi",
+			latitude: 41.8985519,
+			longitude: -87.6245748,
+			content: htmlContentString,
+			visible: true,
+			type: RETAIL_TYPE
+		},
+		{
+			name: "Saks Fifth Avenue",
+			latitude: 41.8955436,
+			longitude: -87.6242948,
+			content: htmlContentString,
+			visible: true,
+			type: RETAIL_TYPE
+		},
+		{
+			name: "Tiffany & Co.",
+			latitude: 41.895922,
+			longitude: -87.624644,
+			content: htmlContentString,
+			visible: true,
+			type: RETAIL_TYPE
+		},
+		{
+			name: "Cartier",
+			latitude: 41.893637,
+			longitude: -87.624655,
+			content: htmlContentString,
+			visible: true,
+			type: RETAIL_TYPE
+		},
+		{
+			name: "H2O Plus Inc",
+			latitude: 41.8929245,
+			longitude: -87.6246406,
+			content: htmlContentString,
+			visible: true,
+			type: RETAIL_TYPE
+		},
+		{	name: "Water Tower Place",
+			latitude: 41.8979303,
+			longitude: -87.6228927,
+			content: htmlContentString,
+			visible: true,
+			type: MALL_TYPE
+		},
+		{
+			name: "The Shops at North Bridge",
+			latitude: 41.891432,
+			longitude: -87.624808,
+			content: htmlContentString,
+			visible: true,
+			type: MALL_TYPE
+		},
+		{
+			name: "900 North Michigan Avenue",
+			latitude: 41.899641,
+			longitude: -87.625122,
+			content: htmlContentString,
+			visible: true,
+			type: MALL_TYPE
+		},
+		{
+			name: "JP Morgan Chase",
+			latitude: 41.8872977,
+			longitude: -87.6240254,
+			content: htmlContentString,
+			visible: true,
+			type: BANK_TYPE
+		},
+		{
+			name: "Citibank",
+			latitude: 41.8863868,
+			longitude: -87.6238476,
+			content: htmlContentString,
+			visible: true,
+			type: BANK_TYPE
+		},
+		{
+			name: "Bank of America",
+			latitude: 41.8911024,
+			longitude: -87.624805,
+			content: htmlContentString,
+			visible: true,
+			type: BANK_TYPE
+		},
+		{
+			name: "The Purple Pig",
+			latitude: 41.8911214,
+			longitude: -87.6246107,
+			content: htmlContentString,
+			visible: true,
+			type: RESTAURANT_TYPE
+		},
+		{
+			name: "Nomi Restaurant",
+			latitude: 41.8969702,
+			longitude: -87.62506,
+			content: htmlContentString,
+			visible: true,
+			type: RESTAURANT_TYPE
+		},
+		{
+			name: "Bandera",
+			latitude: 41.8918882,
+			longitude: -87.6238574,
+			content: htmlContentString,
+			visible: true,
+			type: RESTAURANT_TYPE
+		},
+		{
+			name: "The Signature Room at the 95th",
+			latitude: 41.8986397,
+			longitude: -87.6227539,
+			content: htmlContentString,
+			visible: true,
+			type: RESTAURANT_TYPE
+		},
+		{
+			name: "Grand Lux Cafe",
+			latitude: 41.8945098,
+			longitude: -87.6249427,
+			content: htmlContentString,
+			visible: true,
+			type: RESTAURANT_TYPE
+		},
+		{
+			name: "Foodlife",
+			latitude: 41.8980164,
+			longitude: -87.6236208,
+			content: htmlContentString,
+			visible: true,
+			type: RESTAURANT_TYPE
+		}
+		];
+	return allData;
+}

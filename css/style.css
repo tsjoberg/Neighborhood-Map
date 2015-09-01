@@ -1,8 +1,15 @@
+/* set the height for body and html */
 html, body {
 	height: 100%;
 	margin: 0;
 	padding: 0;
 }
+/* set the map width and height*/
 #map {
-	height: 100%;
+	width: 1200px;
+	height: 1200px;
+}
+/* set the width of the search box */
+.search-box {
+	width: 300px;
 }
