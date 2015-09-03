@@ -116,7 +116,7 @@ function getVisibleSearchData(name, type) {
 			allOfThisType[one].visible = false;
 		}
 	}
-	return allOfThisType;
+	return allOfThisType[getAllData()];
 }
 
 // using allData's visible property, match on the place(s)
@@ -129,12 +129,6 @@ function setVisibleMarkers(places) {
 		}
 	}
 }
-
-// hope to be the header handle to be displayed in the information window
-var $header = $('header');
-// hope to be the wiki data handle to be displayed in the information window
-var $wiki = $('#wiki');
-// hope to be the yelp data handle to be displayed in the information window
 
 //display markers for the asked places
 function displayMarkers(places) {
@@ -152,20 +146,10 @@ function displayMarkers(places) {
 		//window.setTimeout(function() { markers.push(marker); }, i * 200);
 		markers.push(marker);
 
-		//console.log("header = " + $header);
-		//console.log("wiki = " + $wiki);
-		//console.log("content in marker = " + currentPlace.content);
+		console.log("query results of content = " + currentPlace.content);
 		var infoWindow = new google.maps.InfoWindow({
-							content: currentPlace.content
+							content: currentPlace.content.replace("%headerData%", currentPlace.name)
 						});
-
-		/*var content = "<div style = 'width:200px;min-height:100px'>" + currentPlace.name + "<hr></div>";
-		var data = callYelp(currentPlace.name, function(callback) {
-			console.log("-----------------------------------" + callback.mobile_url);
-			$testID.text = "<p>" + "Mobile Url = " + callback.mobile_url + "</p>"
-		});
-		//console.log("Data from YELP call = " + data.mobile_url);
-		*/
 
 		// anonymous function to help tag proper content window to each marker
 		google.maps.event.addListener(marker, 'click', function(handle, pop) {
@@ -173,40 +157,68 @@ function displayMarkers(places) {
 				pop.open(map, handle);
 			};
 		}(marker, infoWindow));
-
 	}
-	//console.log("Number of markers = " + markers.length);
 }
 
-// consumer key for yelp
+// clear all markers by setting them to null
+function clearMarkers() {
+	for (var i = 0; i < markers.length; i++) {
+		markers[i].setMap(null);
+	}
+	markers = [];
+}
+
+// the locations name is the keyword on which our search works
+// this method call returns an array of our interested locations names
+function getSearchFriendlyData() {
+	var allData = getAllData();
+	var searchFriendly = [];
+	for (var i = 0; i < allData.length; i++) {
+		searchFriendly = searchFriendly.concat(allData[i].name);
+	}
+	return searchFriendly;
+}
+
+function callWiki(business) {
+	var wikiURL = "https://en.wikipedia.org/w/api.php?action=opensearch&search=" + name + ",Chicago&format=json&callback=wikiCallback";
+
+    $.ajax({
+        url: wikiURL,
+        dataType: "jsonp",
+        success: handleWikiData,//function wikiCallback(data) {
+        	//console.log("data from wiki = " + data);
+            //var articleName = data[0];
+            //console.log("article name = " + articleName);
+            //$('wiki').text = articleName;
+            //wikiCallback(article);
+            //clearTimeout(wikiRequestTimeout);
+        //},
+        error: function() {
+        	console.log("failed wiki request for + " + name);
+        }
+    });
+}
+
+function handleWikiData(data) {
+	console.log("wiki data is = " + data);
+}
+
+
 var consumerKey = "DnQn7xnOmHlQHpd80U2bEw";
-// consumer secret for yelp
 var consumerSecret = "PSGT6NZ978aecOU5Y6ElrEbKZMc";
-// consumer token for yelp
 var token = "aEKlZtLMH0rapH_-K7O4U6A5tGFW6fXT";
-// consumer token secret for yelp
 var tokenSecret = "bt64O7Xwt2qJvWACoC3UMOuqIDg";
-// yelp url to send search request to
 var yelpURL = "http://api.yelp.com/v2/search/";
 
-//var restaurant = "The Purple Pig";
-//var city = "Chicago";
-
-// array for our consumer secret and token secret
 var accessor = {
   consumerSecret: consumerSecret,
   tokenSecret: tokenSecret
 };
 
-var yelpResults = [];
-var mobile_url;
 
-// yelp api call
-// works as a prototype. needs to be hooked to display retrieved data
-// in the information window
-function callYelp(business, callback) {
+/*function callYelp(restaurant, contentString) {
 	var parameters = [];
-	parameters.push(['term', business]);
+	parameters.push(['term', restaurant]);
 	parameters.push(['location', "Chicago"]);
 	parameters.push(['callback', 'cb']);
 	parameters.push(['oauth_consumer_key', consumerKey]);
@@ -229,44 +241,18 @@ function callYelp(business, callback) {
 	  'cache': true,
 	  'dataType': 'jsonp',
 	  'jsonpCallback': 'cb',
-	  'success': function(data, textStats, XMLHttpRequest) {
-			//var el = document.getElementById('results');
-			//console.log(data.businesses[0].mobile_url);
-			//yelpResults.push({"url" : data.businesses[0].mobile_url});
-			//console.log("********************* url = " + data.businesses[0].mobile_url);
-			var results = [];
-			mobile_url = data.businesses[0].mobile_url;
-			results.mobile_url = data.businesses[0].mobile_url;
-			//$testID.text = data.businesses[0].mobile_url;
-			//console.log("$testID = " + $testID.text);
-			//console.log("results.mobile_url = " + results.mobile_url);
-			callback(results);
-			//console.log("first memeber of the array = " + data.businesses[0]);
-		  	//console.log("mobile_url = " + data.businesses[0].mobile_url);
-	    }
-		}).fail(function(XMLHttpRequest, status, error) {
-			console.log("Yelp! Yelp! Error from YELP!  " + restaurant);
+	  'success': handleYelpData
+	}).fail(function(XMLHttpRequest, status, error) {
+		console.log("yelp returned an error + " + status);
 	});
 }
 
-// clear all markers by setting them to null
-function clearMarkers() {
-	for (var i = 0; i < markers.length; i++) {
-		markers[i].setMap(null);
-	}
-	markers = [];
+function handleYelpData(data) {
+	console.log("this is interesting!");
+	console.log("data is = " + data.businesses[0].mobile_url);
+	testString = data.businesses[0].mobile_url;
 }
-
-// the locations name is the keyword on which our search works
-// this method call returns an array of our interested locations names
-function getSearchFriendlyData() {
-	var allData = getAllData();
-	var searchFriendly = [];
-	for (var i = 0; i < allData.length; i++) {
-		searchFriendly = searchFriendly.concat(allData[i].name);
-	}
-	return searchFriendly;
-}
+*/
 
 // our knockout obervable object
 function Location(name, latitude, longitude, content, visible, type) {
@@ -276,62 +262,81 @@ function Location(name, latitude, longitude, content, visible, type) {
 	this.content = ko.observable(content);
 	this.visible = ko.observable(visible);
 	this.type = ko.observable(type);
-	var wikiURL = "https://en.wikipedia.org/w/api.php?action=opensearch&search=" + name + ",Chicago&format=json&callback=wikiCallback";
-	console.log("wiki url = " + wikiURL);
-    // jsonp does not have error object hence timeout needs to be set this way
-    //var wikiRequestTimeout = setTimeout(function() {
-    //}, 8000);
 
-    $.ajax({
-        url: wikiURL,
-        dataType: "jsonp",
-        success: function wikiCallback(data) {
-        	//console.log("data from wiki = " + data);
-            var articleName = data[0];
-            console.log("article name = " + articleName);
-            $('wiki').text = articleName;
-            //wikiCallback(article);
-            //clearTimeout(wikiRequestTimeout);
-        },
-        error: function() {
-        	// do some logging
-        	console.log("failed wiki request for + " + name);
-        }
-    });
+	this.yelpResults = ko.observable();
+	this.mobileUrl = ko.observable;
+	ko.computed(function() {
+		var parameters = [];
+		parameters.push(['term', this.name]);
+		parameters.push(['location', "Chicago"]);
+		parameters.push(['callback', 'cb']);
+		parameters.push(['oauth_consumer_key', consumerKey]);
+		parameters.push(['oauth_consumer_secret', consumerSecret]);
+		parameters.push(['oauth_token', token]);
+		parameters.push(['oauth_signature_method', 'HMAC-SHA1']);
+		var message = {
+		  'action': 'http://api.yelp.com/v2/search',
+		  'method': 'GET',
+		  'parameters': parameters
+		};
+		OAuth.setTimestampAndNonce(message);
+		OAuth.SignatureMethod.sign(message, accessor);
+		var parameterMap = OAuth.getParameterMap(message.parameters);
+		parameterMap.oauth_signature = OAuth.percentEncode(parameterMap.oauth_signature)
+		return $.ajax({
+		  'url': message.action,
+		  'data': parameterMap,
+		  'cache': true,
+		  'dataType': 'jsonp',
+		  'jsonpCallback': 'cb',
+		  'success': function(response) {
+			console.log("response from yelp = " + response);
+		  	this.yelpResults = response;
+		  	this.mobileUrl = this.yelpResults.businesses[0].mobile_url;
+		  	console.log("this.yelpResults = " + this.yelpResults.businesses[0].mobile_url);
+		  }
+		}).fail(function(XMLHttpRequest, status, error) {
+			console.log("yelp returned an error + " + status);
+		});
+	});
 
+	console.log("again this.yelpResults = " + this.yelpResults);
+
+	//callYelp(this.name, this.content);
 
 }
 
 // our view model for knockour js
-var viewModel = {
-	locations: ko.observableArray([]),
-	search: ko.observable('')
-	};
-// search on the names adn filter on the matches as the user types the search text
-viewModel.firstMatch = ko.dependentObservable(function() {
-	var search = this.search().toLowerCase();
-	if (!search) {
-		return this.locations();
-	} else {
-		return ko.utils.arrayFilter(this.locations(), function(location){
-			//var val = location.name().toLowerCase().indexOf(search) !== -1
-			//console.log("val = " + val);
-			return location.name().toLowerCase().indexOf(search) !== -1;
-		});
-	}
+var viewModel = function() {
+	var self = this;
+	self.locations = ko.observableArray([]);
+	self.search =  ko.observable('');
 
-}, viewModel);
+	// search on the names and filter on the matches as the user types the search text
+	viewModel.firstMatch = ko.dependentObservable(function() {
+		var search = self.search;
+		if (!search) {
+			return this.locations();
+		} else {
+			return ko.utils.arrayFilter(this.locations(), function(location){
+				//var val = location.name().toLowerCase().indexOf(search) !== -1
+				//console.log("val = " + val);
+				return location.name().toLowerCase().indexOf(search) !== -1;
+			});
+		}
 
-// our obervable mapped location data
-var mappedData = ko.utils.arrayMap(getAllData(), function(item) {
-	console.log("mapped data's content = " + item.content);
-	return new Location(item.name, item.latitude, item.longitude, item.content, item.visible, item.type);
-});
+	}, self);
 
-viewModel.locations(mappedData);
+	self.mappedData =  ko.utils.arrayMap(getAllData(), function(item) {
+		return new Location(item.name, item.latitude, item.longitude, item.content, item.visible, item.type);
+	});
+};
+
+
+//viewModel.locations(mappedData);
 
 $(document).ready(function() {
-	// apply the knockour bindings
+	// apply the knockout bindings
     ko.applyBindings(viewModel);
 
     // autocomplete jqueryui widget implementation for our searchable points of interest
@@ -365,8 +370,8 @@ $(document).ready(function() {
 
 // the generic string for information window
 var htmlContentString = "<div style = 'width:200px;min-height:40px'>" +
-						"<h5 id='header'></h5><hr>" +
-						"<p id='wiki'></p><hr></div>";
+						"<h5>%headerData%</h5><hr>" +
+						"<p data-bind:'text: mobileUrl'></p><hr></div>";
 
 // all the data to be displayed by the markers
 function getAllData() {
@@ -378,7 +383,7 @@ function getAllData() {
 			content: htmlContentString,
 			visible: true,
 			type: HOTEL_TYPE
-		},
+		} ,
 		{
 			name: "West Michigan Avenue",
 			latitude: 41.89006,
@@ -396,7 +401,7 @@ function getAllData() {
 			type: HOTEL_TYPE
 		},
 		{
-			name: "Ritz-Carlton Chicago",
+			name: "Ritz Carlton Chicago",
 			latitude: 41.898021,
 			longitude: -87.622916,
 			content: htmlContentString,
