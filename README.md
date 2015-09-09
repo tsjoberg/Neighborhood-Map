@@ -3,7 +3,8 @@ Neighborhood-Map for Chicago's Magnificent Mile
 
 @author Samata Bulusu
 
-1. The neighborhood map outlines the Chicago Magnificent Mile in pink.
+1. The neighborhood map outlines the Chicago Magnificent Mile in pink. Visit
+   my github page http://samatabulusu.github.io/Neighborhood-Map/ to enjoy the map.
 2. By default, all interested locations are visually shown by markers.
 3. Interesting 'type' of markers are helpfully dropped when buttons
    are clicked. Note that other 'type(s)' are hidden when button is

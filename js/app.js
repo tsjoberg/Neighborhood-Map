@@ -23,10 +23,6 @@ var RETAIL_TYPE = 'retail';
 var BANK_TYPE = 'bank';
 // constant for restaurant type
 var RESTAURANT_TYPE = 'food';
-// constant for all type
-var ALL_TYPE = 'all';
-// an array to contain all interested locations
-var allPlaces;
 // an array to contain all markers
 var markers = [];
 // handle to the google map
@@ -49,7 +45,7 @@ var neighborhoodCoordinates = [{lat: 41.888878, lng: -87.624786},
 // initialize the google map
 function initMap() {
 	map = new google.maps.Map(document.getElementById('map'), {
-		zoom: 16,
+		zoom: 15,
 		center: centerMapCoordinates
 
 	});
@@ -66,19 +62,6 @@ function initMap() {
   	path.setMap(map);
 }
 
-// using allData's visible property, match on the place(s)
-// and set the marker to be visible
-function setVisibleMarkers(places) {
-	for (place in places) {
-		for (var marker in markers) {
-			if (place.name == marker.title)
-				markers[marker].setVisible(place.visible);
-		}
-	}
-}
-
-var markers = [];
-
 //display asked for markers on the google map
 function displayMarkers(markersArray) {
 	// this clears the google map array of markers
@@ -86,7 +69,6 @@ function displayMarkers(markersArray) {
 
 	for (var j = 0; j < markersArray.length; j++) {
 		var yelpArray = markersArray[j];
-		var markerTitle = yelpArray.name;
 		var lat = yelpArray.latitude;
 		var lng = yelpArray.longitude;
 		var marker = new google.maps.Marker({
@@ -95,12 +77,19 @@ function displayMarkers(markersArray) {
 								animation: google.maps.Animation.DROP,
 								title: yelpArray.name
 								});
-		console.log(yelpArray.visible);
 		marker.setVisible(yelpArray.visible);
 		markers.push(marker);
-		var displayElement = '<div class="info-window"><h6>'
-								+ yelpArray.name + '</h6><br>' +
-								'<p>' + yelpArray.mobileUrl + '</p></div>';
+		var displayElement = '<div class="info-window"><h6>' +
+								yelpArray.name + '</h6>' +
+								yelpArray.address + '<p>' + yelpArray.displayPhone  +
+								'<p><img src="' + yelpArray.stars +
+								'" height=20 width=100 alt="Yelp Rating">' +
+								'</p>' +
+								'<p><img src="' + yelpArray.imageUrl +
+								'" height=100 width=150 class="img-thumbnail">' + '</p>' +
+								yelpArray.snippetText + '<br>' +
+								'<a class="btn btn-default btn-small" href="' + yelpArray.mobileUrl +
+								 '" target="_blank">More Yelp!</a></p></div>';
 
 		var infoWindow = new google.maps.InfoWindow({
 								content: displayElement
@@ -117,7 +106,6 @@ function displayMarkers(markersArray) {
 
 // clear all markers on the google map by setting them to null
 function clearMarkers() {
-	console.log("clearing all markers on the map");
 	for (var i = 0; i < markers.length; i++) {
 		markers[i].setMap(null);
 	}
@@ -129,22 +117,22 @@ function clearMarkers() {
 function drop(buttonId) {
 	if (buttonId == HOTEL_TYPE) {
 		setVisibleMarkers(HOTEL_TYPE);
-		displayMarkers(getVisibleMarkers(HOTEL_TYPE));
+		displayMarkers(getVisibleMarkers());
 	} else if (buttonId == MALL_TYPE) {
 		setVisibleMarkers(MALL_TYPE);
-		displayMarkers(getVisibleMarkers(MALL_TYPE));
+		displayMarkers(getVisibleMarkers());
 	} else if (buttonId == LANDMARK_TYPE) {
 		setVisibleMarkers(LANDMARK_TYPE);
-		displayMarkers(getVisibleMarkers(LANDMARK_TYPE));
+		displayMarkers(getVisibleMarkers());
 	} else if (buttonId == RETAIL_TYPE) {
 		setVisibleMarkers(RETAIL_TYPE);
-		displayMarkers(getVisibleMarkers(RETAIL_TYPE));
+		displayMarkers(getVisibleMarkers());
 	} else if (buttonId == BANK_TYPE) {
 		setVisibleMarkers(BANK_TYPE);
-		displayMarkers(getVisibleMarkers(BANK_TYPE));
+		displayMarkers(getVisibleMarkers());
 	} else if (buttonId == RESTAURANT_TYPE) {
 		setVisibleMarkers(RESTAURANT_TYPE);
-		displayMarkers(getVisibleMarkers(RESTAURANT_TYPE));
+		displayMarkers(getVisibleMarkers());
 	}
 }
 
@@ -163,7 +151,7 @@ function setVisibleMarkers(type) {
 
 // get an array of markers of the requested type
 // from the allMarkers array populated by our yelp call
-function getVisibleMarkers(type) {
+function getVisibleMarkers() {
 	var visibleMarkers = [];
 	var len = allMarkers.length;
 	for (var i = 0; i < len; i++) {
@@ -192,14 +180,6 @@ function getVisibleMarkersByPOI(name, type) {
 	return poiMarkers;
 }
 
-// clear all markers by setting them to null
-function clearAllMarkers() {
-	var length = allMarkers.length;
-	for (var i = 0; i < length; i++) {
-		allMarkers[i].setMap(null);
-	}
-	allMarkers = [];
-}
 // consumer key for yelp
 var consumerKey = "DnQn7xnOmHlQHpd80U2bEw";
 // consumer secret for yelp
@@ -208,8 +188,6 @@ var consumerSecret = "PSGT6NZ978aecOU5Y6ElrEbKZMc";
 var token = "aEKlZtLMH0rapH_-K7O4U6A5tGFW6fXT";
 // consumer token secret for yelp
 var tokenSecret = "bt64O7Xwt2qJvWACoC3UMOuqIDg";
-// yelp url to send search request to
-var yelpURL = "http://api.yelp.com/v2/search/";
 
 // array for our consumer secret and token secret
 var accessor = {
@@ -235,19 +213,20 @@ function callYelp(business) {
 	OAuth.setTimestampAndNonce(message);
 	OAuth.SignatureMethod.sign(message, accessor);
 	var parameterMap = OAuth.getParameterMap(message.parameters);
-	parameterMap.oauth_signature = OAuth.percentEncode(parameterMap.oauth_signature)
+	parameterMap.oauth_signature = OAuth.percentEncode(parameterMap.oauth_signature);
 
 	$.ajax({
-	  'url': message.action,
-	  'data': parameterMap,
-	  'cache': true,
-	  'dataType': 'jsonp',
-	  'success': handleYelpData
+		'url': message.action,
+		'data': parameterMap,
+		'cache': true,
+		'dataType': 'jsonp',
+		'success': handleYelpData
 		}).fail(function(XMLHttpRequest, status, error) {
 			console.log("Yelp! Yelp! Error from YELP!  " + business);
 	});
 }
 
+// an array to store marker data from
 var allMarkers = [];
 
 // get the subset array of data of the requested 'type'
@@ -267,16 +246,60 @@ function getType(type) {
 // to populate our markers with
 function handleYelpData(data) {
 	var results = data.businesses;
+	//console.log(data);
 	console.log("this is good!");
 	if (results.length > 0) {
 		//build the successful data to be sent back from the first result
+		/*
+		display_phone: "+1-312-440-1500"
+		id: "warwick-allerton-hotel-chicago-chicago-3"
+		image_url: "http://s3-media3.fl.yelpcdn.com/bphoto/iaJuS6ehDXXvbzq27M85Zg/ms.jpg"
+		is_claimed: true
+		is_closed: false
+		location: Object
+		address: Array[1]
+		city: "Chicago"
+		coordinate: Object
+		latitude: 41.895154
+		longitude: -87.623928
+		__proto__: Object
+		country_code: "US"
+		cross_streets: "Superior St & Huron St"
+		display_address: Array[3]
+		0: "701 N Michigan Ave"
+		1: "Near North Side"
+		2: "Chicago, IL 60611"
+		length: 3
+		__proto__: Array[0]
+		geo_accuracy: 9.5
+		neighborhoods: Array[2]
+		postal_code: "60611"
+		state_code: "IL"
+		__proto__: Object
+		mobile_url: "http://m.yelp.com/biz/warwick-allerton-hotel-chicago-chicago-3"
+		name: "Warwick Allerton Hotel Chicago"
+		phone: "3124401500"
+		rating: 3.5
+		rating_img_url: "http://s3-media1.fl.yelpcdn.com/assets/2/www/img/5ef3eb3cb162/ico/stars/v1/stars_3_half.png"
+		rating_img_url_large: "http://s3-media3.fl.yelpcdn.com/assets/2/www/img/bd9b7a815d1b/ico/stars/v1/stars_large_3_half.png"
+		rating_img_url_small: "http://s3-media1.fl.yelpcdn.com/assets/2/www/img/2e909d5d3536/ico/stars/v1/stars_small_3_half.png"
+		review_count: 259
+		snippet_image_url: "http://s3-media3.fl.yelpcdn.com/photo/8r8s6-tKCAbEPrRSyeOVuQ/ms.jpg"
+		snippet_text: "Location, location, location! The Warwick Allerton is nestled along the Magnificent Mile, on the corner of Michigan and East Huron. While many reviewers..."
+		url: "http://www.yelp.com/biz/warwick-allerton-hotel-chicago-chicago-3"
+		*/
 		var business = data.businesses[0];
 		var name = business.name;
 		var lat = business.location.coordinate.latitude;
 		var lng = business.location.coordinate.longitude;
+		var displayPhone = business.display_phone;
+		var url = business.url;
 		var mobileUrl = business.mobile_url;
-		var image = business.image_url;
+		var stars = business.rating_img_url_small;
+		var imageUrl = business.image_url;
 		var rating = business.rating;
+		var snippetText = business.snippet_text;
+		var address = business.location.display_address[0] + "<br>" + business.location.display_address[business.location.display_address.length - 1];
 		var type;
 
 		// set hotel type in marker
@@ -293,8 +316,8 @@ function handleYelpData(data) {
 		//set mall type for marker
 		var mallTypes = getType(MALL_TYPE);
 		var mlength = mallTypes.length;
-		for (var i = 0; i < mlength; i++) {
-			var mallName = mallTypes[i].name.toLowerCase();
+		for (var j = 0; j < mlength; j++) {
+			var mallName = mallTypes[j].name.toLowerCase();
 			var markerName = name.toLowerCase();
 			if (markerName.indexOf(mallName) != -1) {
 				type = MALL_TYPE;
@@ -304,8 +327,8 @@ function handleYelpData(data) {
 		// set retail type for marker
 		var retailTypes = getType(RETAIL_TYPE);
 		var rlength = retailTypes.length;
-		for (var i = 0; i < rlength; i++) {
-			var retailName = retailTypes[i].name.toLowerCase();
+		for (var k = 0; k < rlength; k++) {
+			var retailName = retailTypes[k].name.toLowerCase();
 			var markerName = name.toLowerCase();
 			if (markerName.indexOf(retailName) != -1) {
 				type = RETAIL_TYPE;
@@ -315,8 +338,8 @@ function handleYelpData(data) {
 		// set bank type for marker
 		var bankTypes = getType(BANK_TYPE);
 		var blength = bankTypes.length;
-		for (var i = 0; i < blength; i++) {
-			var bankName = bankTypes[i].name.toLowerCase();
+		for (var a = 0; a < blength; a++) {
+			var bankName = bankTypes[a].name.toLowerCase();
 			var markerName = name.toLowerCase();
 			if (markerName.indexOf(bankName) != -1) {
 				type = BANK_TYPE;
@@ -326,8 +349,8 @@ function handleYelpData(data) {
 		// set food/restaurant type for marker
 		var foodTypes = getType(RESTAURANT_TYPE);
 		var flength = foodTypes.length;
-		for (var i = 0; i < flength; i++) {
-			var foodName = foodTypes[i].name.toLowerCase();
+		for (var b = 0; b < flength; b++) {
+			var foodName = foodTypes[b].name.toLowerCase();
 			var markerName = name.toLowerCase();
 			if (markerName.indexOf(foodName) != -1) {
 				type = RESTAURANT_TYPE;
@@ -337,8 +360,8 @@ function handleYelpData(data) {
 		// set landmark type for marker
 		var landmarkTypes = getType(LANDMARK_TYPE);
 		var llength = landmarkTypes.length;
-		for (var i = 0; i < llength; i++) {
-			var landmarkName = landmarkTypes[i].name.toLowerCase();
+		for (var c = 0; c < llength; c++) {
+			var landmarkName = landmarkTypes[c].name.toLowerCase();
 			var markerName = name.toLowerCase();
 			if (markerName.indexOf(landmarkName) != -1) {
 				type = LANDMARK_TYPE;
@@ -350,8 +373,13 @@ function handleYelpData(data) {
 							"longitude": lng,
 							"mobileUrl": mobileUrl,
 							"rating": rating,
-							"image": image,
+							"imageUrl": imageUrl,
 							"type": type,
+							"snippetText": snippetText,
+							"address": address,
+							"stars": stars,
+							"displayPhone": displayPhone,
+							"url": url,
 							"visible": true};
 
 
@@ -453,21 +481,7 @@ var allData = [
 			type: HOTEL_TYPE
 		},
 		{
-			name: "West Michigan Avenue",
-			latitude: 41.89006,
-			longitude: -87.62420,
-			visible: true,
-			type: HOTEL_TYPE
-		},
-		{
-			name: "Four Seasons Hotel",
-			latitude: 41.89934,
-			longitude: -87.62514,
-			visible: true,
-			type: HOTEL_TYPE
-		},
-		{
-			name: "Ritz-Carlton Chicago",
+			name: "Spa At The Ritz-Carlton Chicago, A Four Seasons Hotel",
 			latitude: 41.898021,
 			longitude: -87.622916,
 			visible: true,
@@ -481,7 +495,7 @@ var allData = [
 			type: HOTEL_TYPE
 		},
 		{
-			name: "Warwick Allerton Hotel",
+			name: "Warwick Allerton Hotel Chicago",
 			latitude: 41.8951737,
 			longitude: -87.623672,
 			visible: true,
@@ -495,34 +509,6 @@ var allData = [
 			type: HOTEL_TYPE
 		},
 		{
-			name: "Hotel Inter-Continental Chicago",
-			latitude: 41.8913023,
-			longitude: -87.6235601,
-			visible: true,
-			type: HOTEL_TYPE
-		},
-		{
-			name: "The Palmolive Building",
-			latitude: 41.8997926,
-			longitude: -87.6233398,
-			visible: true,
-			type: LANDMARK_TYPE
-		},
-		{
-			name: "Drake Hotel Landmark",
-			latitude: 41.900401,
-			longitude: -87.623364,
-			visible: true,
-			type: LANDMARK_TYPE
-		},
-		{
-			name: "Old Chicago Water Tower",
-			latitude: 41.8971797,
-			longitude: -87.6243939,
-			visible: true,
-			type: LANDMARK_TYPE
-		},
-		{
 			name: "Tribune Tower",
 			latitude: 41.8904213,
 			longitude: -87.623588,
@@ -533,13 +519,6 @@ var allData = [
 			name: "Michigan Avenue Bridge",
 			latitude: 41.8905111,
 			longitude: -87.6244856,
-			visible: true,
-			type: LANDMARK_TYPE
-		},
-		{
-			name: "Site of Old Fort Dearborn",
-			latitude: 41.8879019,
-			longitude: -87.6240778,
 			visible: true,
 			type: LANDMARK_TYPE
 		},
@@ -593,7 +572,7 @@ var allData = [
 			type: RETAIL_TYPE
 		},
 		{
-			name: "Tumi",
+			name: "Tumi Luggage",
 			latitude: 41.8985519,
 			longitude: -87.6245748,
 			visible: true,
@@ -617,13 +596,6 @@ var allData = [
 			name: "Cartier",
 			latitude: 41.893637,
 			longitude: -87.624655,
-			visible: true,
-			type: RETAIL_TYPE
-		},
-		{
-			name: "H2O Plus Inc",
-			latitude: 41.8929245,
-			longitude: -87.6246406,
 			visible: true,
 			type: RETAIL_TYPE
 		},
@@ -676,14 +648,14 @@ var allData = [
 			type: RESTAURANT_TYPE
 		},
 		{
-			name: "Nomi Kitchen",
+			name: "NoMI Kitchen",
 			latitude: 41.8969702,
 			longitude: -87.62506,
 			visible: true,
 			type: RESTAURANT_TYPE
 		},
 		{
-			name: "Bandera",
+			name: "Bandera Restaurant",
 			latitude: 41.8918882,
 			longitude: -87.6238574,
 			visible: true,
