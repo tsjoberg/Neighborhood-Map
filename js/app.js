@@ -54,7 +54,7 @@ function initMap() {
 
 	});
 	// all interested locations markers to be dropped when map is initiated
-	drop(ALL_TYPE);
+	//drop(ALL_TYPE);
 	// draw a polyline for magnificent mile in google maps
 	var path = new google.maps.Polyline({
 	    path: neighborhoodCoordinates,
@@ -64,59 +64,6 @@ function initMap() {
 	    strokeWeight: 2
 	});
   	path.setMap(map);
-}
-
-// drop markers when buttons are clicked
-function drop(buttonId) {
-	if (buttonId == HOTEL_TYPE) {
-		setVisibleMarkers(getVisibleData(HOTEL_TYPE));
-		displayMarkers(getVisibleData(HOTEL_TYPE));
-	} else if (buttonId == MALL_TYPE) {
-		setVisibleMarkers(getVisibleData(MALL_TYPE));
-		displayMarkers(getVisibleData(MALL_TYPE));
-	} else if (buttonId == LANDMARK_TYPE) {
-		setVisibleMarkers(getVisibleData(LANDMARK_TYPE));
-		displayMarkers(getVisibleData(LANDMARK_TYPE));
-	} else if (buttonId == RETAIL_TYPE) {
-		setVisibleMarkers(getVisibleData(RETAIL_TYPE));
-		displayMarkers(getVisibleData(RETAIL_TYPE));
-	} else if (buttonId == BANK_TYPE) {
-		setVisibleMarkers(getVisibleData(BANK_TYPE));
-		displayMarkers(getVisibleData(BANK_TYPE));
-	} else if (buttonId == RESTAURANT_TYPE) {
-		setVisibleMarkers(getVisibleData(RESTAURANT_TYPE));
-		displayMarkers(getVisibleData(RESTAURANT_TYPE));
-	} else if (buttonId = ALL_TYPE) {
-		displayMarkers(getAllData());
-	}
-}
-
-// set all the data's visible property for this'type' to true
-// all other types are set to visible false
-function getVisibleData(type) {
-	var allData = getAllData();
-	for (var data in allData) {
-		if (allData[data].type == type) {
-			allData[data].visible = true;
-		} else {
-			allData[data].visible = false;
-		}
-	}
-	return allData;
-}
-
-// get all data marking visible to true for this 'name' and 'type'
-// all others are set to visible false
-function getVisibleSearchData(name, type) {
-	var allOfThisType = getVisibleData(type);
-	for (var one in allOfThisType) {
-		if (allOfThisType[one].name == name) {
-			allOfThisType[one].visible = true;
-		} else {
-			allOfThisType[one].visible = false;
-		}
-	}
-	return allOfThisType[getAllData()];
 }
 
 // using allData's visible property, match on the place(s)
@@ -131,8 +78,34 @@ function setVisibleMarkers(places) {
 }
 
 //display markers for the asked places
-function displayMarkers(places) {
-	clearMarkers();
+function displayMarkers(yelpArray) {
+	console.log("array in displayMarkers = " + yelpArray);
+	// signature of this array
+	// name, latitude, longitude, displayString, rating, image
+	var markerTitle = yelpArray[0];
+	console.log("marker title = " + markerTitle);
+	var lat = yelpArray[1];
+	var lng = yelpArray[2];
+	var marker = new google.maps.Marker({
+							position: new google.maps.LatLng(lat, lng),
+							map: map,
+							animation: google.maps.Animation.DROP,
+							title: markerTitle
+							});
+	console.log("content string = " + yelpArray[3]);
+	var infoWindow = new google.maps.InfoWindow({
+							content: yelpArray[3]
+						});
+
+	// anonymous function to help tag proper content window to each marker
+	google.maps.event.addListener(marker, 'click', function(handle, pop) {
+		return function() {
+			pop.open(map, handle);
+		};
+	}(marker, infoWindow));
+
+
+	/*clearMarkers();
 	for (var i = 0; i < places.length; i++) {
 		var currentPlace = places[i];
 		var marker = new google.maps.Marker({
@@ -145,10 +118,21 @@ function displayMarkers(places) {
 		// TODO - version 2 - make that markers drop to the map with a delay
 		//window.setTimeout(function() { markers.push(marker); }, i * 200);
 		markers.push(marker);
+		callYelp(currentPlace.name);
 
-		console.log("query results of content = " + currentPlace.content);
+		console.log("yelpResults = " + yelpResults);
+
+		if (yelpResults.length > 0) {
+			console.log("first item from yelpResults = " + yelpResults[0]);
+		}
+		/*var contentString = '<div class="info_content">';
+		contentString += '<h4>' + mk.title + '</h4>';
+		contentString += '<p>' + mk.ph + '</p>';
+		contentString += '<p class="review"><img src="' + mk.pic + '">' + mk.blurb + '</p>';
+		contentString += '</div>';
+
 		var infoWindow = new google.maps.InfoWindow({
-							content: currentPlace.content.replace("%headerData%", currentPlace.name)
+							content: currentPlace.content
 						});
 
 		// anonymous function to help tag proper content window to each marker
@@ -157,68 +141,38 @@ function displayMarkers(places) {
 				pop.open(map, handle);
 			};
 		}(marker, infoWindow));
+
 	}
+	//console.log("Number of markers = " + markers.length);
+	*/
 }
 
-// clear all markers by setting them to null
-function clearMarkers() {
-	for (var i = 0; i < markers.length; i++) {
-		markers[i].setMap(null);
-	}
-	markers = [];
-}
-
-// the locations name is the keyword on which our search works
-// this method call returns an array of our interested locations names
-function getSearchFriendlyData() {
-	var allData = getAllData();
-	var searchFriendly = [];
-	for (var i = 0; i < allData.length; i++) {
-		searchFriendly = searchFriendly.concat(allData[i].name);
-	}
-	return searchFriendly;
-}
-
-function callWiki(business) {
-	var wikiURL = "https://en.wikipedia.org/w/api.php?action=opensearch&search=" + name + ",Chicago&format=json&callback=wikiCallback";
-
-    $.ajax({
-        url: wikiURL,
-        dataType: "jsonp",
-        success: handleWikiData,//function wikiCallback(data) {
-        	//console.log("data from wiki = " + data);
-            //var articleName = data[0];
-            //console.log("article name = " + articleName);
-            //$('wiki').text = articleName;
-            //wikiCallback(article);
-            //clearTimeout(wikiRequestTimeout);
-        //},
-        error: function() {
-        	console.log("failed wiki request for + " + name);
-        }
-    });
-}
-
-function handleWikiData(data) {
-	console.log("wiki data is = " + data);
-}
-
-
+// consumer key for yelp
 var consumerKey = "DnQn7xnOmHlQHpd80U2bEw";
+// consumer secret for yelp
 var consumerSecret = "PSGT6NZ978aecOU5Y6ElrEbKZMc";
+// consumer token for yelp
 var token = "aEKlZtLMH0rapH_-K7O4U6A5tGFW6fXT";
+// consumer token secret for yelp
 var tokenSecret = "bt64O7Xwt2qJvWACoC3UMOuqIDg";
+// yelp url to send search request to
 var yelpURL = "http://api.yelp.com/v2/search/";
 
+//var restaurant = "The Purple Pig";
+//var city = "Chicago";
+
+// array for our consumer secret and token secret
 var accessor = {
   consumerSecret: consumerSecret,
   tokenSecret: tokenSecret
 };
 
-
-/*function callYelp(restaurant, contentString) {
+// yelp api call
+// works as a prototype. needs to be hooked to display retrieved data
+// in the information window
+function callYelp(business) {
 	var parameters = [];
-	parameters.push(['term', restaurant]);
+	parameters.push(['term', business]);
 	parameters.push(['location', "Chicago"]);
 	parameters.push(['callback', 'cb']);
 	parameters.push(['oauth_consumer_key', consumerKey]);
@@ -240,19 +194,57 @@ var accessor = {
 	  'data': parameterMap,
 	  'cache': true,
 	  'dataType': 'jsonp',
-	  'jsonpCallback': 'cb',
 	  'success': handleYelpData
-	}).fail(function(XMLHttpRequest, status, error) {
-		console.log("yelp returned an error + " + status);
+		}).fail(function(XMLHttpRequest, status, error) {
+			//console.log("Yelp! Yelp! Error from YELP!  " + business);
 	});
 }
 
 function handleYelpData(data) {
-	console.log("this is interesting!");
-	console.log("data is = " + data.businesses[0].mobile_url);
-	testString = data.businesses[0].mobile_url;
+	//console.log(data);
+	var yelpResults = [];
+	var results = data.businesses;
+	console.log("this is good!");
+	if (results.length > 0) {
+		//build the successful data to be sent back from the first result
+
+		var business = data.businesses[0];
+		var name = business.name;
+		var lat = business.location.coordinate.latitude;
+		var lng = business.location.coordinate.longitude;
+		var image = business.image_url;
+		var rating = business.rating;
+
+		var displayElement = '<div class="row"><h3>' + name + '</h3>' + '<span>' + rating + '</span>';
+
+		var markerData = [name, lat, lng, displayElement, rating, image];
+
+		//yelpResults.push(markerData);
+		displayMarkers(markerData);
+		//$yelpList.append(el);
+	} else {
+		yelpResults.push(["failed to return data"]);
+	}
 }
-*/
+
+// clear all markers by setting them to null
+function clearMarkers() {
+	for (var i = 0; i < markers.length; i++) {
+		markers[i].setMap(null);
+	}
+	markers = [];
+}
+
+// the locations name is the keyword on which our search works
+// this method call returns an array of our interested locations names
+function getSearchFriendlyData() {
+	var length = allData.length;
+	var searchFriendly = [];
+	for (var i = 0; i < length; i++) {
+		searchFriendly = searchFriendly.concat(allData[i].name);
+	}
+	return searchFriendly;
+}
 
 // our knockout obervable object
 function Location(name, latitude, longitude, content, visible, type) {
@@ -262,81 +254,37 @@ function Location(name, latitude, longitude, content, visible, type) {
 	this.content = ko.observable(content);
 	this.visible = ko.observable(visible);
 	this.type = ko.observable(type);
-
-	this.yelpResults = ko.observable();
-	this.mobileUrl = ko.observable;
-	ko.computed(function() {
-		var parameters = [];
-		parameters.push(['term', this.name]);
-		parameters.push(['location', "Chicago"]);
-		parameters.push(['callback', 'cb']);
-		parameters.push(['oauth_consumer_key', consumerKey]);
-		parameters.push(['oauth_consumer_secret', consumerSecret]);
-		parameters.push(['oauth_token', token]);
-		parameters.push(['oauth_signature_method', 'HMAC-SHA1']);
-		var message = {
-		  'action': 'http://api.yelp.com/v2/search',
-		  'method': 'GET',
-		  'parameters': parameters
-		};
-		OAuth.setTimestampAndNonce(message);
-		OAuth.SignatureMethod.sign(message, accessor);
-		var parameterMap = OAuth.getParameterMap(message.parameters);
-		parameterMap.oauth_signature = OAuth.percentEncode(parameterMap.oauth_signature)
-		return $.ajax({
-		  'url': message.action,
-		  'data': parameterMap,
-		  'cache': true,
-		  'dataType': 'jsonp',
-		  'jsonpCallback': 'cb',
-		  'success': function(response) {
-			console.log("response from yelp = " + response);
-		  	this.yelpResults = response;
-		  	this.mobileUrl = this.yelpResults.businesses[0].mobile_url;
-		  	console.log("this.yelpResults = " + this.yelpResults.businesses[0].mobile_url);
-		  }
-		}).fail(function(XMLHttpRequest, status, error) {
-			console.log("yelp returned an error + " + status);
-		});
-	});
-
-	console.log("again this.yelpResults = " + this.yelpResults);
-
-	//callYelp(this.name, this.content);
-
 }
 
 // our view model for knockour js
-var viewModel = function() {
-	var self = this;
-	self.locations = ko.observableArray([]);
-	self.search =  ko.observable('');
+var viewModel = {
+	locations: ko.observableArray([]),
+	search: ko.observable('')
+	};
+// search on the names adn filter on the matches as the user types the search text
+viewModel.firstMatch = ko.dependentObservable(function() {
+	var search = this.search().toLowerCase();
+	if (!search) {
+		return this.locations();
+	} else {
+		return ko.utils.arrayFilter(this.locations(), function(location){
+			//var val = location.name().toLowerCase().indexOf(search) !== -1
+			//console.log("val = " + val);
+			return location.name().toLowerCase().indexOf(search) !== -1;
+		});
+	}
 
-	// search on the names and filter on the matches as the user types the search text
-	viewModel.firstMatch = ko.dependentObservable(function() {
-		var search = self.search;
-		if (!search) {
-			return this.locations();
-		} else {
-			return ko.utils.arrayFilter(this.locations(), function(location){
-				//var val = location.name().toLowerCase().indexOf(search) !== -1
-				//console.log("val = " + val);
-				return location.name().toLowerCase().indexOf(search) !== -1;
-			});
-		}
+}, viewModel);
 
-	}, self);
+// our obervable mapped location data
+var mappedData = ko.utils.arrayMap(allData, function(item) {
+	return new Location(item.name, item.latitude, item.longitude, item.content, item.visible, item.type);
+});
 
-	self.mappedData =  ko.utils.arrayMap(getAllData(), function(item) {
-		return new Location(item.name, item.latitude, item.longitude, item.content, item.visible, item.type);
-	});
-};
-
-
-//viewModel.locations(mappedData);
+viewModel.locations(mappedData);
 
 $(document).ready(function() {
-	// apply the knockout bindings
+	// apply the knockour bindings
     ko.applyBindings(viewModel);
 
     // autocomplete jqueryui widget implementation for our searchable points of interest
@@ -350,9 +298,9 @@ $(document).ready(function() {
     	if (e.which == 13) {
 			//console.log("ui gives: " + ui.item.label);
 			//get the proper object
-			var allData = getAllData();
+			var length = allData.length;
 			var currentData;
-			for (var i = 0; i < allData.length; i++) {
+			for (var i = 0; i < length; i++) {
 				currentData = allData[i];
 				console.log("currentData = " + currentData.content);
 				if (ui.item.label == currentData.name) {
@@ -366,16 +314,22 @@ $(document).ready(function() {
 			displayMarkers(getVisibleSearchData(currentData.name, currentData.type));
     	}
     });
+
+    var numData = allData.length;
+    for (var i = 0; i < numData; i++) {
+    	var currentData = allData[i];
+    	callYelp(currentData.name);
+    }
+
 });
 
 // the generic string for information window
 var htmlContentString = "<div style = 'width:200px;min-height:40px'>" +
-						"<h5>%headerData%</h5><hr>" +
-						"<p data-bind:'text: mobileUrl'></p><hr></div>";
+						"<h5 id='header'></h5><hr>" +
+						"<p id='wiki'></p><hr></div>";
 
 // all the data to be displayed by the markers
-function getAllData() {
-	var allData = [
+var allData = [
 		{
 			name: "The Drake Hotel",
 			latitude: 41.900401,
@@ -383,7 +337,7 @@ function getAllData() {
 			content: htmlContentString,
 			visible: true,
 			type: HOTEL_TYPE
-		} ,
+		},
 		{
 			name: "West Michigan Avenue",
 			latitude: 41.89006,
@@ -401,7 +355,7 @@ function getAllData() {
 			type: HOTEL_TYPE
 		},
 		{
-			name: "Ritz Carlton Chicago",
+			name: "Ritz-Carlton Chicago",
 			latitude: 41.898021,
 			longitude: -87.622916,
 			content: htmlContentString,
@@ -679,6 +633,4 @@ function getAllData() {
 			visible: true,
 			type: RESTAURANT_TYPE
 		}
-		];
-	return allData;
-}
+	];
