@@ -79,18 +79,14 @@ function setVisibleMarkers(places) {
 
 var markers = [];
 
-//display markers for the asked places
+//display asked for markers on the google map
 function displayMarkers(markersArray) {
-	console.log("calling clearMarkers..");
+	// this clears the google map array of markers
 	clearMarkers();
-	console.log("called clearMarkers and out of it");
-	//console.log("array in displayMarkers = " + yelpArray);
-	// signature of this array
-	// name, latitude, longitude, rating, image
+
 	for (var j = 0; j < markersArray.length; j++) {
 		var yelpArray = markersArray[j];
 		var markerTitle = yelpArray.name;
-		//console.log("marker title = " + markerTitle);
 		var lat = yelpArray.latitude;
 		var lng = yelpArray.longitude;
 		var marker = new google.maps.Marker({
@@ -102,7 +98,6 @@ function displayMarkers(markersArray) {
 		console.log(yelpArray.visible);
 		marker.setVisible(yelpArray.visible);
 		markers.push(marker);
-		//console.log("content string = " + yelpArray[3]);
 		var displayElement = '<div class="info-window"><h6>'
 								+ yelpArray.name + '</h6><br>' +
 								'<p>' + yelpArray.mobileUrl + '</p></div>';
@@ -120,7 +115,7 @@ function displayMarkers(markersArray) {
 	}
 }
 
-// clear all markers by setting them to null
+// clear all markers on the google map by setting them to null
 function clearMarkers() {
 	console.log("clearing all markers on the map");
 	for (var i = 0; i < markers.length; i++) {
@@ -129,21 +124,31 @@ function clearMarkers() {
 	markers = [];
 }
 
+// display markers on the map as requested by type
+// determined by the button clicked
 function drop(buttonId) {
-	//console.log("yelp results = " + yelpResults);
-	console.log("buttonId = " + buttonId);
-	console.log("allMarkers has = "  + allMarkers.length);
-	// set the type in yelpData from the allData type
-	var length = allMarkers.length;
 	if (buttonId == HOTEL_TYPE) {
 		setVisibleMarkers(HOTEL_TYPE);
 		displayMarkers(getVisibleMarkers(HOTEL_TYPE));
 	} else if (buttonId == MALL_TYPE) {
 		setVisibleMarkers(MALL_TYPE);
 		displayMarkers(getVisibleMarkers(MALL_TYPE));
+	} else if (buttonId == LANDMARK_TYPE) {
+		setVisibleMarkers(LANDMARK_TYPE);
+		displayMarkers(getVisibleMarkers(LANDMARK_TYPE));
+	} else if (buttonId == RETAIL_TYPE) {
+		setVisibleMarkers(RETAIL_TYPE);
+		displayMarkers(getVisibleMarkers(RETAIL_TYPE));
+	} else if (buttonId == BANK_TYPE) {
+		setVisibleMarkers(BANK_TYPE);
+		displayMarkers(getVisibleMarkers(BANK_TYPE));
+	} else if (buttonId == RESTAURANT_TYPE) {
+		setVisibleMarkers(RESTAURANT_TYPE);
+		displayMarkers(getVisibleMarkers(RESTAURANT_TYPE));
 	}
 }
 
+// set markers of the given type to visible in our allMarkers array
 function setVisibleMarkers(type) {
 	var len = allMarkers.length;
 	for (var i = 0; i < len; i++) {
@@ -156,6 +161,8 @@ function setVisibleMarkers(type) {
 	}
 }
 
+// get an array of markers of the requested type
+// from the allMarkers array populated by our yelp call
 function getVisibleMarkers(type) {
 	var visibleMarkers = [];
 	var len = allMarkers.length;
@@ -166,6 +173,23 @@ function getVisibleMarkers(type) {
 		}
 	}
 	return visibleMarkers;
+}
+
+// get the array of markers with the requested name and type
+// from allMarkers array populated by our yelp call
+function getVisibleMarkersByPOI(name, type) {
+	var poiMarkers = [];
+	var len = allMarkers.length;
+	for (var i = 0; i < len; i++) {
+		var marker = allMarkers[i];
+		if (marker.name == name &&  marker.type == type) {
+			marker.visible = true;
+			poiMarkers.push(marker);
+		} else {
+			marker.visible = false;
+		}
+	}
+	return poiMarkers;
 }
 
 // clear all markers by setting them to null
@@ -194,8 +218,6 @@ var accessor = {
 };
 
 // yelp api call
-// works as a prototype. needs to be hooked to display retrieved data
-// in the information window
 function callYelp(business) {
 	var parameters = [];
 	parameters.push(['term', business]);
@@ -228,6 +250,7 @@ function callYelp(business) {
 
 var allMarkers = [];
 
+// get the subset array of data of the requested 'type'
 function getType(type) {
 	var types = [];
 	var length = allData.length;
@@ -240,14 +263,13 @@ function getType(type) {
 	return types;
 }
 
+// callback function that handles yelp data
+// to populate our markers with
 function handleYelpData(data) {
-
-	//console.log(data);
 	var results = data.businesses;
 	console.log("this is good!");
 	if (results.length > 0) {
 		//build the successful data to be sent back from the first result
-
 		var business = data.businesses[0];
 		var name = business.name;
 		var lat = business.location.coordinate.latitude;
@@ -323,7 +345,6 @@ function handleYelpData(data) {
 			}
 		}
 
-
 		var markerData = {"name": name,
 							"latitude": lat,
 							"longitude": lng,
@@ -335,20 +356,9 @@ function handleYelpData(data) {
 
 
 		allMarkers.push(markerData);
-		// display markers as the data comes back from yelp
-		// this as a lovely side effect of visual delay drop of markers
 	} else {
 		console.log("Unable to obain yelp data for: " + data);
 	}
-
-}
-
-// clear all markers by setting them to null
-function clearMarkers() {
-	for (var i = 0; i < markers.length; i++) {
-		markers[i].setMap(null);
-	}
-	markers = [];
 }
 
 // the locations name is the keyword on which our search works
@@ -372,7 +382,7 @@ function Location(name, latitude, longitude, content, visible, type) {
 	this.type = ko.observable(type);
 }
 
-// our view model for knockour js
+// our view model for knockout js
 var viewModel = {
 	locations: ko.observableArray([]),
 	search: ko.observable('')
@@ -412,7 +422,6 @@ $(document).ready(function() {
     $('#autocomplete').on('autocompleteselect', function(e, ui) {
     	// 13 == enter key
     	if (e.which == 13) {
-			//console.log("ui gives: " + ui.item.label);
 			//get the proper object
 			var length = allData.length;
 			var currentData;
@@ -423,13 +432,7 @@ $(document).ready(function() {
 					break;
 				}
 			}
-
-			callYelp(currentData.name);
-			// set visible on all data objects of this 'type'
-			//setVisibleMarkers(getVisibleData(currentData.type));
-			// first set visible on data object of this 'type' and 'name'
-			// then set visible on that marker to true and all other markers to 'false'
-			//displayMarkers(getVisibleSearchData(currentData.name, currentData.type));
+			displayMarkers(getVisibleMarkersByPOI(currentData.name, currentData.type));
     	}
     });
 
@@ -440,18 +443,12 @@ $(document).ready(function() {
     }
 });
 
-// the generic string for information window
-var htmlContentString = "<div style = 'width:200px;min-height:40px'>" +
-						"<h5 id='header'></h5><hr>" +
-						"<p id='wiki'></p><hr></div>";
-
 // all the data to be displayed by the markers
 var allData = [
 		{
 			name: "The Drake Hotel",
 			latitude: 41.900401,
 			longitude: -87.623364,
-			content: htmlContentString,
 			visible: true,
 			type: HOTEL_TYPE
 		},
@@ -459,7 +456,6 @@ var allData = [
 			name: "West Michigan Avenue",
 			latitude: 41.89006,
 			longitude: -87.62420,
-			content: htmlContentString,
 			visible: true,
 			type: HOTEL_TYPE
 		},
@@ -467,7 +463,6 @@ var allData = [
 			name: "Four Seasons Hotel",
 			latitude: 41.89934,
 			longitude: -87.62514,
-			content: htmlContentString,
 			visible: true,
 			type: HOTEL_TYPE
 		},
@@ -475,7 +470,6 @@ var allData = [
 			name: "Ritz-Carlton Chicago",
 			latitude: 41.898021,
 			longitude: -87.622916,
-			content: htmlContentString,
 			visible: true,
 			type: HOTEL_TYPE
 		},
@@ -483,7 +477,6 @@ var allData = [
 			name: "Park Hyatt Chicago",
 			latitude: 41.89706,
 			longitude: -87.624992,
-			content: htmlContentString,
 			visible: true,
 			type: HOTEL_TYPE
 		},
@@ -491,7 +484,6 @@ var allData = [
 			name: "Warwick Allerton Hotel",
 			latitude: 41.8951737,
 			longitude: -87.623672,
-			content: htmlContentString,
 			visible: true,
 			type: HOTEL_TYPE
 		},
@@ -499,7 +491,6 @@ var allData = [
 			name: "Omni Chicago Hotel",
 			latitude: 41.8946608,
 			longitude: -87.6248416,
-			content: htmlContentString,
 			visible: true,
 			type: HOTEL_TYPE
 		},
@@ -507,7 +498,6 @@ var allData = [
 			name: "Hotel Inter-Continental Chicago",
 			latitude: 41.8913023,
 			longitude: -87.6235601,
-			content: htmlContentString,
 			visible: true,
 			type: HOTEL_TYPE
 		},
@@ -515,7 +505,6 @@ var allData = [
 			name: "The Palmolive Building",
 			latitude: 41.8997926,
 			longitude: -87.6233398,
-			content: htmlContentString,
 			visible: true,
 			type: LANDMARK_TYPE
 		},
@@ -523,7 +512,6 @@ var allData = [
 			name: "Drake Hotel Landmark",
 			latitude: 41.900401,
 			longitude: -87.623364,
-			content: htmlContentString,
 			visible: true,
 			type: LANDMARK_TYPE
 		},
@@ -531,7 +519,6 @@ var allData = [
 			name: "Old Chicago Water Tower",
 			latitude: 41.8971797,
 			longitude: -87.6243939,
-			content: htmlContentString,
 			visible: true,
 			type: LANDMARK_TYPE
 		},
@@ -539,7 +526,6 @@ var allData = [
 			name: "Tribune Tower",
 			latitude: 41.8904213,
 			longitude: -87.623588,
-			content: htmlContentString,
 			visible: true,
 			type: LANDMARK_TYPE
 		},
@@ -547,7 +533,6 @@ var allData = [
 			name: "Michigan Avenue Bridge",
 			latitude: 41.8905111,
 			longitude: -87.6244856,
-			content: htmlContentString,
 			visible: true,
 			type: LANDMARK_TYPE
 		},
@@ -555,7 +540,6 @@ var allData = [
 			name: "Site of Old Fort Dearborn",
 			latitude: 41.8879019,
 			longitude: -87.6240778,
-			content: htmlContentString,
 			visible: true,
 			type: LANDMARK_TYPE
 		},
@@ -563,7 +547,6 @@ var allData = [
 			name: "John Hancock Center",
 			latitude: 41.8987699,
 			longitude: -87.6229168,
-			content: htmlContentString,
 			visible: true,
 			type: LANDMARK_TYPE
 		},
@@ -571,7 +554,6 @@ var allData = [
 			name: "The Magnificent Mile",
 			latitude: 41.9004747,
 			longitude: -87.6246925,
-			content: htmlContentString,
 			visible: true,
 			type: LANDMARK_TYPE
 		},
@@ -579,7 +561,6 @@ var allData = [
 			name: "Bloomingdale's",
 			latitude: 41.899638,
 			longitude: -87.625613,
-			content: htmlContentString,
 			visible: true,
 			type: RETAIL_TYPE
 		},
@@ -587,7 +568,6 @@ var allData = [
 			name: "Burberry",
 			latitude: 41.8936109,
 			longitude: -87.62389,
-			content: htmlContentString,
 			visible: true,
 			type: RETAIL_TYPE
 		},
@@ -595,7 +575,6 @@ var allData = [
 			name: "Chanel Boutique",
 			latitude: 41.8989299,
 			longitude: -87.6249675,
-			content: htmlContentString,
 			visible: true,
 			type: RETAIL_TYPE
 		},
@@ -603,7 +582,6 @@ var allData = [
 			name: "Coach",
 			latitude: 41.8931504,
 			longitude: -87.6237321,
-			content: htmlContentString,
 			visible: true,
 			type: RETAIL_TYPE
 		},
@@ -611,7 +589,6 @@ var allData = [
 			name: "Louis Vuitton",
 			latitude: 41.899891,
 			longitude: -87.623854,
-			content: htmlContentString,
 			visible: true,
 			type: RETAIL_TYPE
 		},
@@ -619,7 +596,6 @@ var allData = [
 			name: "Tumi",
 			latitude: 41.8985519,
 			longitude: -87.6245748,
-			content: htmlContentString,
 			visible: true,
 			type: RETAIL_TYPE
 		},
@@ -627,7 +603,6 @@ var allData = [
 			name: "Saks Fifth Avenue",
 			latitude: 41.8955436,
 			longitude: -87.6242948,
-			content: htmlContentString,
 			visible: true,
 			type: RETAIL_TYPE
 		},
@@ -635,7 +610,6 @@ var allData = [
 			name: "Tiffany & Co",
 			latitude: 41.895922,
 			longitude: -87.624644,
-			content: htmlContentString,
 			visible: true,
 			type: RETAIL_TYPE
 		},
@@ -643,7 +617,6 @@ var allData = [
 			name: "Cartier",
 			latitude: 41.893637,
 			longitude: -87.624655,
-			content: htmlContentString,
 			visible: true,
 			type: RETAIL_TYPE
 		},
@@ -651,14 +624,12 @@ var allData = [
 			name: "H2O Plus Inc",
 			latitude: 41.8929245,
 			longitude: -87.6246406,
-			content: htmlContentString,
 			visible: true,
 			type: RETAIL_TYPE
 		},
 		{	name: "Water Tower Place",
 			latitude: 41.8979303,
 			longitude: -87.6228927,
-			content: htmlContentString,
 			visible: true,
 			type: MALL_TYPE
 		},
@@ -666,7 +637,6 @@ var allData = [
 			name: "The Shops at North Bridge",
 			latitude: 41.891432,
 			longitude: -87.624808,
-			content: htmlContentString,
 			visible: true,
 			type: MALL_TYPE
 		},
@@ -674,7 +644,6 @@ var allData = [
 			name: "The 900 Shops",
 			latitude: 41.899641,
 			longitude: -87.625122,
-			content: htmlContentString,
 			visible: true,
 			type: MALL_TYPE
 		},
@@ -682,7 +651,6 @@ var allData = [
 			name: "Chase Bank",
 			latitude: 41.8872977,
 			longitude: -87.6240254,
-			content: htmlContentString,
 			visible: true,
 			type: BANK_TYPE
 		},
@@ -690,7 +658,6 @@ var allData = [
 			name: "Citibank",
 			latitude: 41.8863868,
 			longitude: -87.6238476,
-			content: htmlContentString,
 			visible: true,
 			type: BANK_TYPE
 		},
@@ -698,7 +665,6 @@ var allData = [
 			name: "Bank of America",
 			latitude: 41.8911024,
 			longitude: -87.624805,
-			content: htmlContentString,
 			visible: true,
 			type: BANK_TYPE
 		},
@@ -706,7 +672,6 @@ var allData = [
 			name: "The Purple Pig",
 			latitude: 41.8911214,
 			longitude: -87.6246107,
-			content: htmlContentString,
 			visible: true,
 			type: RESTAURANT_TYPE
 		},
@@ -714,7 +679,6 @@ var allData = [
 			name: "Nomi Kitchen",
 			latitude: 41.8969702,
 			longitude: -87.62506,
-			content: htmlContentString,
 			visible: true,
 			type: RESTAURANT_TYPE
 		},
@@ -722,7 +686,6 @@ var allData = [
 			name: "Bandera",
 			latitude: 41.8918882,
 			longitude: -87.6238574,
-			content: htmlContentString,
 			visible: true,
 			type: RESTAURANT_TYPE
 		},
@@ -730,7 +693,6 @@ var allData = [
 			name: "The Signature Room at the 95th",
 			latitude: 41.8986397,
 			longitude: -87.6227539,
-			content: htmlContentString,
 			visible: true,
 			type: RESTAURANT_TYPE
 		},
@@ -738,7 +700,6 @@ var allData = [
 			name: "Grand Lux Cafe",
 			latitude: 41.8945098,
 			longitude: -87.6249427,
-			content: htmlContentString,
 			visible: true,
 			type: RESTAURANT_TYPE
 		},
@@ -746,7 +707,6 @@ var allData = [
 			name: "Foodlife",
 			latitude: 41.8980164,
 			longitude: -87.6236208,
-			content: htmlContentString,
 			visible: true,
 			type: RESTAURANT_TYPE
 		}
