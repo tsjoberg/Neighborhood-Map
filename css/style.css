@@ -6,10 +6,18 @@ html, body {
 }
 /* set the map width and height*/
 #map {
-	width: 1200px;
-	height: 1200px;
+	width: 900px;
+	height: 1000px;
 }
 /* set the width of the search box */
 .search-box {
 	width: 300px;
+}
+
+.info-window {
+	height: 100% !important;
+	max-width: 400px;
+    line-height: normal;
+	white-space: nowrap;
+	overflow: auto;
 }

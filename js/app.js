@@ -77,63 +77,39 @@ function setVisibleMarkers(places) {
 	}
 }
 
+var markers = [];
+
 //display markers for the asked places
-function displayMarkers(yelpArray) {
-	console.log("array in displayMarkers = " + yelpArray);
+function displayMarkers(markersArray) {
+	console.log("calling clearMarkers..");
+	clearMarkers();
+	console.log("called clearMarkers and out of it");
+	//console.log("array in displayMarkers = " + yelpArray);
 	// signature of this array
-	// name, latitude, longitude, displayString, rating, image
-	var markerTitle = yelpArray[0];
-	console.log("marker title = " + markerTitle);
-	var lat = yelpArray[1];
-	var lng = yelpArray[2];
-	var marker = new google.maps.Marker({
-							position: new google.maps.LatLng(lat, lng),
-							map: map,
-							animation: google.maps.Animation.DROP,
-							title: markerTitle
-							});
-	console.log("content string = " + yelpArray[3]);
-	var infoWindow = new google.maps.InfoWindow({
-							content: yelpArray[3]
-						});
-
-	// anonymous function to help tag proper content window to each marker
-	google.maps.event.addListener(marker, 'click', function(handle, pop) {
-		return function() {
-			pop.open(map, handle);
-		};
-	}(marker, infoWindow));
-
-
-	/*clearMarkers();
-	for (var i = 0; i < places.length; i++) {
-		var currentPlace = places[i];
+	// name, latitude, longitude, rating, image
+	for (var j = 0; j < markersArray.length; j++) {
+		var yelpArray = markersArray[j];
+		var markerTitle = yelpArray.name;
+		//console.log("marker title = " + markerTitle);
+		var lat = yelpArray.latitude;
+		var lng = yelpArray.longitude;
 		var marker = new google.maps.Marker({
-							position: new google.maps.LatLng(currentPlace.latitude, currentPlace.longitude),
-							map: map,
-							animation: google.maps.Animation.DROP,
-							title: currentPlace.name
-							});
-		marker.setVisible(currentPlace.visible);
-		// TODO - version 2 - make that markers drop to the map with a delay
-		//window.setTimeout(function() { markers.push(marker); }, i * 200);
+								position: new google.maps.LatLng(lat, lng),
+								map: map,
+								animation: google.maps.Animation.DROP,
+								title: yelpArray.name
+								});
+		console.log(yelpArray.visible);
+		marker.setVisible(yelpArray.visible);
 		markers.push(marker);
-		callYelp(currentPlace.name);
-
-		console.log("yelpResults = " + yelpResults);
-
-		if (yelpResults.length > 0) {
-			console.log("first item from yelpResults = " + yelpResults[0]);
-		}
-		/*var contentString = '<div class="info_content">';
-		contentString += '<h4>' + mk.title + '</h4>';
-		contentString += '<p>' + mk.ph + '</p>';
-		contentString += '<p class="review"><img src="' + mk.pic + '">' + mk.blurb + '</p>';
-		contentString += '</div>';
+		//console.log("content string = " + yelpArray[3]);
+		var displayElement = '<div class="info-window"><h6>'
+								+ yelpArray.name + '</h6><br>' +
+								'<p>' + yelpArray.mobileUrl + '</p></div>';
 
 		var infoWindow = new google.maps.InfoWindow({
-							content: currentPlace.content
-						});
+								content: displayElement
+							});
 
 		// anonymous function to help tag proper content window to each marker
 		google.maps.event.addListener(marker, 'click', function(handle, pop) {
@@ -141,12 +117,65 @@ function displayMarkers(yelpArray) {
 				pop.open(map, handle);
 			};
 		}(marker, infoWindow));
-
 	}
-	//console.log("Number of markers = " + markers.length);
-	*/
 }
 
+// clear all markers by setting them to null
+function clearMarkers() {
+	console.log("clearing all markers on the map");
+	for (var i = 0; i < markers.length; i++) {
+		markers[i].setMap(null);
+	}
+	markers = [];
+}
+
+function drop(buttonId) {
+	//console.log("yelp results = " + yelpResults);
+	console.log("buttonId = " + buttonId);
+	console.log("allMarkers has = "  + allMarkers.length);
+	// set the type in yelpData from the allData type
+	var length = allMarkers.length;
+	if (buttonId == HOTEL_TYPE) {
+		setVisibleMarkers(HOTEL_TYPE);
+		displayMarkers(getVisibleMarkers(HOTEL_TYPE));
+	} else if (buttonId == MALL_TYPE) {
+		setVisibleMarkers(MALL_TYPE);
+		displayMarkers(getVisibleMarkers(MALL_TYPE));
+	}
+}
+
+function setVisibleMarkers(type) {
+	var len = allMarkers.length;
+	for (var i = 0; i < len; i++) {
+		var marker = allMarkers[i];
+		if (marker.type == type) {
+			marker.visible = true;
+		} else {
+			marker.visible = false;
+		}
+	}
+}
+
+function getVisibleMarkers(type) {
+	var visibleMarkers = [];
+	var len = allMarkers.length;
+	for (var i = 0; i < len; i++) {
+		var marker = allMarkers[i];
+		if (marker.visible) {
+			visibleMarkers.push(marker);
+		}
+	}
+	return visibleMarkers;
+}
+
+// clear all markers by setting them to null
+function clearAllMarkers() {
+	var length = allMarkers.length;
+	for (var i = 0; i < length; i++) {
+		allMarkers[i].setMap(null);
+	}
+	allMarkers = [];
+}
 // consumer key for yelp
 var consumerKey = "DnQn7xnOmHlQHpd80U2bEw";
 // consumer secret for yelp
@@ -157,9 +186,6 @@ var token = "aEKlZtLMH0rapH_-K7O4U6A5tGFW6fXT";
 var tokenSecret = "bt64O7Xwt2qJvWACoC3UMOuqIDg";
 // yelp url to send search request to
 var yelpURL = "http://api.yelp.com/v2/search/";
-
-//var restaurant = "The Purple Pig";
-//var city = "Chicago";
 
 // array for our consumer secret and token secret
 var accessor = {
@@ -196,13 +222,27 @@ function callYelp(business) {
 	  'dataType': 'jsonp',
 	  'success': handleYelpData
 		}).fail(function(XMLHttpRequest, status, error) {
-			//console.log("Yelp! Yelp! Error from YELP!  " + business);
+			console.log("Yelp! Yelp! Error from YELP!  " + business);
 	});
 }
 
+var allMarkers = [];
+
+function getType(type) {
+	var types = [];
+	var length = allData.length;
+	for (var i = 0; i < length; i++) {
+		var data = allData[i];
+		if (data.type == type) {
+			types.push(data);
+		}
+	}
+	return types;
+}
+
 function handleYelpData(data) {
+
 	//console.log(data);
-	var yelpResults = [];
 	var results = data.businesses;
 	console.log("this is good!");
 	if (results.length > 0) {
@@ -212,19 +252,95 @@ function handleYelpData(data) {
 		var name = business.name;
 		var lat = business.location.coordinate.latitude;
 		var lng = business.location.coordinate.longitude;
+		var mobileUrl = business.mobile_url;
 		var image = business.image_url;
 		var rating = business.rating;
+		var type;
 
-		var displayElement = '<div class="row"><h3>' + name + '</h3>' + '<span>' + rating + '</span>';
+		// set hotel type in marker
+		var hotelTypes = getType(HOTEL_TYPE);
+		var hlength = hotelTypes.length;
+		for (var i = 0; i < hlength; i++) {
+			var hotelName = hotelTypes[i].name.toLowerCase();
+			var markerName = name.toLowerCase();
+			if (markerName.indexOf(hotelName) != -1) {
+				type = HOTEL_TYPE;
+			}
+		}
 
-		var markerData = [name, lat, lng, displayElement, rating, image];
+		//set mall type for marker
+		var mallTypes = getType(MALL_TYPE);
+		var mlength = mallTypes.length;
+		for (var i = 0; i < mlength; i++) {
+			var mallName = mallTypes[i].name.toLowerCase();
+			var markerName = name.toLowerCase();
+			if (markerName.indexOf(mallName) != -1) {
+				type = MALL_TYPE;
+			}
+		}
 
-		//yelpResults.push(markerData);
-		displayMarkers(markerData);
-		//$yelpList.append(el);
+		// set retail type for marker
+		var retailTypes = getType(RETAIL_TYPE);
+		var rlength = retailTypes.length;
+		for (var i = 0; i < rlength; i++) {
+			var retailName = retailTypes[i].name.toLowerCase();
+			var markerName = name.toLowerCase();
+			if (markerName.indexOf(retailName) != -1) {
+				type = RETAIL_TYPE;
+			}
+		}
+
+		// set bank type for marker
+		var bankTypes = getType(BANK_TYPE);
+		var blength = bankTypes.length;
+		for (var i = 0; i < blength; i++) {
+			var bankName = bankTypes[i].name.toLowerCase();
+			var markerName = name.toLowerCase();
+			if (markerName.indexOf(bankName) != -1) {
+				type = BANK_TYPE;
+			}
+		}
+
+		// set food/restaurant type for marker
+		var foodTypes = getType(RESTAURANT_TYPE);
+		var flength = foodTypes.length;
+		for (var i = 0; i < flength; i++) {
+			var foodName = foodTypes[i].name.toLowerCase();
+			var markerName = name.toLowerCase();
+			if (markerName.indexOf(foodName) != -1) {
+				type = RESTAURANT_TYPE;
+			}
+		}
+
+		// set landmark type for marker
+		var landmarkTypes = getType(LANDMARK_TYPE);
+		var llength = landmarkTypes.length;
+		for (var i = 0; i < llength; i++) {
+			var landmarkName = landmarkTypes[i].name.toLowerCase();
+			var markerName = name.toLowerCase();
+			if (markerName.indexOf(landmarkName) != -1) {
+				type = LANDMARK_TYPE;
+			}
+		}
+
+
+		var markerData = {"name": name,
+							"latitude": lat,
+							"longitude": lng,
+							"mobileUrl": mobileUrl,
+							"rating": rating,
+							"image": image,
+							"type": type,
+							"visible": true};
+
+
+		allMarkers.push(markerData);
+		// display markers as the data comes back from yelp
+		// this as a lovely side effect of visual delay drop of markers
 	} else {
-		yelpResults.push(["failed to return data"]);
+		console.log("Unable to obain yelp data for: " + data);
 	}
+
 }
 
 // clear all markers by setting them to null
@@ -302,16 +418,18 @@ $(document).ready(function() {
 			var currentData;
 			for (var i = 0; i < length; i++) {
 				currentData = allData[i];
-				console.log("currentData = " + currentData.content);
+				//console.log("currentData = " + currentData.content);
 				if (ui.item.label == currentData.name) {
 					break;
 				}
 			}
+
+			callYelp(currentData.name);
 			// set visible on all data objects of this 'type'
-			setVisibleMarkers(getVisibleData(currentData.type));
+			//setVisibleMarkers(getVisibleData(currentData.type));
 			// first set visible on data object of this 'type' and 'name'
 			// then set visible on that marker to true and all other markers to 'false'
-			displayMarkers(getVisibleSearchData(currentData.name, currentData.type));
+			//displayMarkers(getVisibleSearchData(currentData.name, currentData.type));
     	}
     });
 
@@ -320,7 +438,6 @@ $(document).ready(function() {
     	var currentData = allData[i];
     	callYelp(currentData.name);
     }
-
 });
 
 // the generic string for information window
@@ -451,7 +568,7 @@ var allData = [
 			type: LANDMARK_TYPE
 		},
 		{
-			name: "One Magnificient Mile",
+			name: "The Magnificent Mile",
 			latitude: 41.9004747,
 			longitude: -87.6246925,
 			content: htmlContentString,
@@ -515,7 +632,7 @@ var allData = [
 			type: RETAIL_TYPE
 		},
 		{
-			name: "Tiffany & Co.",
+			name: "Tiffany & Co",
 			latitude: 41.895922,
 			longitude: -87.624644,
 			content: htmlContentString,
@@ -554,7 +671,7 @@ var allData = [
 			type: MALL_TYPE
 		},
 		{
-			name: "900 North Michigan Avenue",
+			name: "The 900 Shops",
 			latitude: 41.899641,
 			longitude: -87.625122,
 			content: htmlContentString,
@@ -562,7 +679,7 @@ var allData = [
 			type: MALL_TYPE
 		},
 		{
-			name: "JP Morgan Chase",
+			name: "Chase Bank",
 			latitude: 41.8872977,
 			longitude: -87.6240254,
 			content: htmlContentString,
@@ -594,7 +711,7 @@ var allData = [
 			type: RESTAURANT_TYPE
 		},
 		{
-			name: "Nomi Restaurant",
+			name: "Nomi Kitchen",
 			latitude: 41.8969702,
 			longitude: -87.62506,
 			content: htmlContentString,
