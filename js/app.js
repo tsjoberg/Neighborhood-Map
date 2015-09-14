@@ -62,45 +62,48 @@ function initMap() {
   	path.setMap(map);
 }
 
+function displayMarker(markersArray) {
+	var yelpArray = markersArray;
+	var lat = yelpArray.latitude;
+	var lng = yelpArray.longitude;
+	var marker = new google.maps.Marker({
+							position: new google.maps.LatLng(lat, lng),
+							map: map,
+							animation: google.maps.Animation.DROP,
+							title: yelpArray.name
+							});
+	marker.setVisible(yelpArray.visible);
+	markers.push(marker);
+	var displayElement = '<div class="info-window"><h6>' +
+							yelpArray.name + '</h6>' +
+							yelpArray.address + '<p>' + yelpArray.displayPhone  +
+							'<p><img src="' + yelpArray.stars +
+							'" height=20 width=100 alt="Yelp Rating">' +
+							'</p>' +
+							'<p><img src="' + yelpArray.imageUrl +
+							'" height=100 width=150 class="img-thumbnail">' + '</p>' +
+							yelpArray.snippetText + '<br>' +
+							'<a class="btn btn-default btn-small" href="' + yelpArray.mobileUrl +
+							 '" target="_blank">More Yelp!</a></p></div>';
+
+	var infoWindow = new google.maps.InfoWindow({
+							content: displayElement
+						});
+
+	// anonymous function to help tag proper content window to each marker
+	google.maps.event.addListener(marker, 'click', function(handle, pop) {
+		return function() {
+			pop.open(map, handle);
+		};
+	}(marker, infoWindow));
+}
+
 //display asked for markers on the google map
 function displayMarkers(markersArray) {
 	// this clears the google map array of markers
 	clearMarkers();
-
 	for (var j = 0; j < markersArray.length; j++) {
-		var yelpArray = markersArray[j];
-		var lat = yelpArray.latitude;
-		var lng = yelpArray.longitude;
-		var marker = new google.maps.Marker({
-								position: new google.maps.LatLng(lat, lng),
-								map: map,
-								animation: google.maps.Animation.DROP,
-								title: yelpArray.name
-								});
-		marker.setVisible(yelpArray.visible);
-		markers.push(marker);
-		var displayElement = '<div class="info-window"><h6>' +
-								yelpArray.name + '</h6>' +
-								yelpArray.address + '<p>' + yelpArray.displayPhone  +
-								'<p><img src="' + yelpArray.stars +
-								'" height=20 width=100 alt="Yelp Rating">' +
-								'</p>' +
-								'<p><img src="' + yelpArray.imageUrl +
-								'" height=100 width=150 class="img-thumbnail">' + '</p>' +
-								yelpArray.snippetText + '<br>' +
-								'<a class="btn btn-default btn-small" href="' + yelpArray.mobileUrl +
-								 '" target="_blank">More Yelp!</a></p></div>';
-
-		var infoWindow = new google.maps.InfoWindow({
-								content: displayElement
-							});
-
-		// anonymous function to help tag proper content window to each marker
-		google.maps.event.addListener(marker, 'click', function(handle, pop) {
-			return function() {
-				pop.open(map, handle);
-			};
-		}(marker, infoWindow));
+		displayMarker(markersArray[j]);
 	}
 }
 
@@ -384,6 +387,9 @@ function handleYelpData(data) {
 
 
 		allMarkers.push(markerData);
+		console.log("trying to display: " + markerData.name);
+		displayMarker(markerData);
+
 	} else {
 		console.log("Unable to obain yelp data for: " + data);
 	}
@@ -475,210 +481,145 @@ $(document).ready(function() {
 var allData = [
 		{
 			name: "The Drake Hotel",
-			latitude: 41.900401,
-			longitude: -87.623364,
-			visible: true,
-			type: HOTEL_TYPE
-		},
-		{
-			name: "Spa At The Ritz-Carlton Chicago, A Four Seasons Hotel",
-			latitude: 41.898021,
-			longitude: -87.622916,
 			visible: true,
 			type: HOTEL_TYPE
 		},
 		{
 			name: "Park Hyatt Chicago",
-			latitude: 41.89706,
-			longitude: -87.624992,
 			visible: true,
 			type: HOTEL_TYPE
 		},
 		{
 			name: "Warwick Allerton Hotel Chicago",
-			latitude: 41.8951737,
-			longitude: -87.623672,
 			visible: true,
 			type: HOTEL_TYPE
 		},
 		{
 			name: "Omni Chicago Hotel",
-			latitude: 41.8946608,
-			longitude: -87.6248416,
 			visible: true,
 			type: HOTEL_TYPE
 		},
 		{
 			name: "Tribune Tower",
-			latitude: 41.8904213,
-			longitude: -87.623588,
 			visible: true,
 			type: LANDMARK_TYPE
 		},
 		{
 			name: "Michigan Avenue Bridge",
-			latitude: 41.8905111,
-			longitude: -87.6244856,
 			visible: true,
 			type: LANDMARK_TYPE
 		},
 		{
 			name: "John Hancock Center",
-			latitude: 41.8987699,
-			longitude: -87.6229168,
 			visible: true,
 			type: LANDMARK_TYPE
 		},
 		{
 			name: "The Magnificent Mile",
-			latitude: 41.9004747,
-			longitude: -87.6246925,
 			visible: true,
 			type: LANDMARK_TYPE
 		},
 		{
 			name: "Bloomingdale's",
-			latitude: 41.899638,
-			longitude: -87.625613,
 			visible: true,
 			type: RETAIL_TYPE
 		},
 		{
 			name: "Burberry",
-			latitude: 41.8936109,
-			longitude: -87.62389,
 			visible: true,
 			type: RETAIL_TYPE
 		},
 		{
 			name: "Chanel Boutique",
-			latitude: 41.8989299,
-			longitude: -87.6249675,
 			visible: true,
 			type: RETAIL_TYPE
 		},
 		{
 			name: "Coach",
-			latitude: 41.8931504,
-			longitude: -87.6237321,
 			visible: true,
 			type: RETAIL_TYPE
 		},
 		{
 			name: "Louis Vuitton",
-			latitude: 41.899891,
-			longitude: -87.623854,
 			visible: true,
 			type: RETAIL_TYPE
 		},
 		{
 			name: "Tumi Luggage",
-			latitude: 41.8985519,
-			longitude: -87.6245748,
 			visible: true,
 			type: RETAIL_TYPE
 		},
 		{
 			name: "Saks Fifth Avenue",
-			latitude: 41.8955436,
-			longitude: -87.6242948,
 			visible: true,
 			type: RETAIL_TYPE
 		},
 		{
 			name: "Tiffany & Co",
-			latitude: 41.895922,
-			longitude: -87.624644,
 			visible: true,
 			type: RETAIL_TYPE
 		},
 		{
 			name: "Cartier",
-			latitude: 41.893637,
-			longitude: -87.624655,
 			visible: true,
 			type: RETAIL_TYPE
 		},
 		{	name: "Water Tower Place",
-			latitude: 41.8979303,
-			longitude: -87.6228927,
 			visible: true,
 			type: MALL_TYPE
 		},
 		{
 			name: "The Shops at North Bridge",
-			latitude: 41.891432,
-			longitude: -87.624808,
 			visible: true,
 			type: MALL_TYPE
 		},
 		{
 			name: "The 900 Shops",
-			latitude: 41.899641,
-			longitude: -87.625122,
 			visible: true,
 			type: MALL_TYPE
 		},
 		{
 			name: "Chase Bank",
-			latitude: 41.8872977,
-			longitude: -87.6240254,
 			visible: true,
 			type: BANK_TYPE
 		},
 		{
 			name: "Citibank",
-			latitude: 41.8863868,
-			longitude: -87.6238476,
 			visible: true,
 			type: BANK_TYPE
 		},
 		{
 			name: "Bank of America",
-			latitude: 41.8911024,
-			longitude: -87.624805,
 			visible: true,
 			type: BANK_TYPE
 		},
 		{
 			name: "The Purple Pig",
-			latitude: 41.8911214,
-			longitude: -87.6246107,
 			visible: true,
 			type: RESTAURANT_TYPE
 		},
 		{
 			name: "NoMI Kitchen",
-			latitude: 41.8969702,
-			longitude: -87.62506,
 			visible: true,
 			type: RESTAURANT_TYPE
 		},
 		{
 			name: "Bandera Restaurant",
-			latitude: 41.8918882,
-			longitude: -87.6238574,
 			visible: true,
 			type: RESTAURANT_TYPE
 		},
 		{
 			name: "The Signature Room at the 95th",
-			latitude: 41.8986397,
-			longitude: -87.6227539,
 			visible: true,
 			type: RESTAURANT_TYPE
 		},
 		{
 			name: "Grand Lux Cafe",
-			latitude: 41.8945098,
-			longitude: -87.6249427,
 			visible: true,
 			type: RESTAURANT_TYPE
 		},
 		{
 			name: "Foodlife",
-			latitude: 41.8980164,
-			longitude: -87.6236208,
 			visible: true,
 			type: RESTAURANT_TYPE
 		}

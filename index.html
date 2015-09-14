@@ -22,19 +22,18 @@
   <body>
     <div class="container">
 
-      <div class="row"><h3 class="header" align="center">Chicago's Magnificent Mile</h3>
+      <div class="row header">
+        <span>Chicago's Magnificent Mile</span>
         <hr class="ruler">
       </div>
 
       <div class="row">
 
         <div class="col-md-3">
-          <div id="panel">
-            <h4>Search: <input id="autocomplete" class="search-box"
-                            data-bind="value: search, valueUpdate: 'afterKeyDown'"
-                            style="width:230px; height: 30px" />
-            </h4>
-          </div>
+            <span class="search-text">Search:
+              <input id="autocomplete" class="search-box"
+                            data-bind="value: search, valueUpdate: 'afterKeyDown'"/>
+            </span>
         </div>
 
         <div class="col-md-9">

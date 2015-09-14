@@ -27,12 +27,38 @@ body {
     margin-right: 2px;
     border-style: inset;
     border-width: 1px;
+	border-color: #FF69B4;
+	margin-bottom: 3px;
 }
 
 .header {
 	font-family: verdana;
+	font-size: 24px;
+	color: #FF69B4;
+	text-align: center;
+}
+
+.search-text {
+	font-family: verdana;
 	font-size: 18px;
 	color: #FF69B4;
+	text-align: left;
+}
+
+input {
+    float:right;
+    width: 270px;
+    border: 2px solid #dadada;
+    border-radius: 7px;
+    font-size: 20px;
+    padding: 5px;
+    margin-top: -10px;
+}
+
+input:focus {
+    outline: none;
+    border-color: #FF69B4;
+    box-shadow:0 0 10px #FF69B4;
 }
 
 /* style for info window on marker*/
