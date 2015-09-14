@@ -7,7 +7,8 @@
 <html>
   <head>
     <title>Chicago's Magnificent Mile</title>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <!-- <meta name="viewport" content="initial-scale=1.0, user-scalable=no"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/bootstrap.min.css">
@@ -20,27 +21,31 @@
   </head>
   <body>
     <div class="container">
-      <div class="row"><h4 align="center">Neighborhood Map for Chicago's Magnificent Mile</h4><hr></div>
-      <div class="row">
-        <div id="panel" style="margin-left: 52px">
-          <button id="hotel" onclick="drop(this.id)">Hotels</button>
-          <button id="mall" onclick="drop(this.id)">Malls</button>
-          <button id="food" onclick="drop(this.id)">Food</button>
-          <button id="landmark" onclick="drop(this.id)">Landmarks</button>
-          <button id="retail" onclick="drop(this.id)">Retail</button>
-          <button id="bank" onclick="drop(this.id)">Banks</button>
-          <h6>Search: <input id="autocomplete" class="search-box"
-            data-bind="value: search, valueUpdate: 'afterKeyDown'"/>
-          </h6>
-        </div>
-        <div class="row"><br></div>
-        <div id="map" class="row map-style"></div>
-        <div class="col-xs-12" id='map-canvas'>
-          <script src="js/knockout-3.3.0.js"></script>
-          <script src="https://maps.googleapis.com/maps/api/js?callback=initMap"></script>
-          <script src="js/app.js"></script>
-        </div>
+
+      <div class="row"><h3 class="header" align="center">Chicago's Magnificent Mile</h3>
+        <hr class="ruler">
       </div>
+
+      <div class="row">
+
+        <div class="col-xs-4">
+          <div id="panel" style="margin-left: 40px">
+            <h6>Search: <input id="autocomplete" class="search-box"
+              data-bind="value: search, valueUpdate: 'afterKeyDown'"/>
+            </h6>
+          </div>
+        </div>
+
+        <div class="col-xs-8">
+          <div id="map" class="row map-style"></div>
+            <script src="js/knockout-3.3.0.js"></script>
+            <script src="https://maps.googleapis.com/maps/api/js?callback=initMap"></script>
+            <script src="js/app.js"></script>
+        </div>
+
+      </div>
+
     </div>
+
   </body>
 </html>

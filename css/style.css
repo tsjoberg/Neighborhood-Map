@@ -10,12 +10,30 @@ body {
 /* font relative to device */
 .h6 {
 	font-size: 4vw;
+	font-family: verdana;
 }
 /* set the map width and height*/
 #map {
 	position: relative;
     padding-bottom: 85%; // This is the aspect ratio
     overflow: hidden;
+    max-width: device-width;
+}
+
+.ruler {
+	display: block;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    margin-left: 2px;
+    margin-right: 2px;
+    border-style: inset;
+    border-width: 1px;
+}
+
+.header {
+	font-family: verdana;
+	font-size: 18px;
+	color: #FF69B4;
 }
 /* set the width of the search box */
 .search-box {
@@ -29,3 +47,4 @@ body {
     line-height: normal;
 	overflow: auto;
 }
+

@@ -29,7 +29,7 @@ var markers = [];
 var map;
 
 // center the map at the middle(ish) if Magnificent Mile
-var centerMapCoordinates = {lat: 41.894271, lng: -87.624148};
+var centerMapCoordinates = {lat: 41.888810, lng: -87.624048};
 // for outline of the neighborhood
 var neighborhoodCoordinates = [{lat: 41.888878, lng: -87.624786},
 								{lat: 41.889249, lng: -87.624695},
@@ -45,7 +45,7 @@ var neighborhoodCoordinates = [{lat: 41.888878, lng: -87.624786},
 // initialize the google map
 function initMap() {
 	map = new google.maps.Map(document.getElementById('map'), {
-		zoom: 15,
+		zoom: 14,
 		center: centerMapCoordinates
 
 	});
