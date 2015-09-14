@@ -17,6 +17,7 @@ body {
 	position: relative;
     padding-bottom: 85%; // This is the aspect ratio
     overflow: hidden;
+    width: 100%;
 }
 
 .ruler {
@@ -33,21 +34,25 @@ body {
 
 .header {
 	font-family: verdana;
-	font-size: 24px;
+	font-size: 20px;
 	color: #FF69B4;
 	text-align: center;
+	width: 100%;
 }
 
 .search-text {
 	font-family: verdana;
-	font-size: 18px;
+	font-size: 16px;
 	color: #FF69B4;
 	text-align: left;
 }
 
+.search-box {
+	width: 90%;
+}
+
 input {
-    float:right;
-    width: 270px;
+    float: left;
     border: 2px solid #dadada;
     border-radius: 7px;
     font-size: 20px;
