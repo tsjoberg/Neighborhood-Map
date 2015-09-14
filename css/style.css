@@ -3,7 +3,7 @@ html,
 body {
 	height: 100vw;
 	margin: 0;
-	padding: 0;
+	padding: 10px;
 	font-size: 5vw;
 }
 
@@ -13,11 +13,10 @@ body {
 	font-family: verdana;
 }
 /* set the map width and height*/
-#map {
+.map-style {
 	position: relative;
     padding-bottom: 85%; // This is the aspect ratio
     overflow: hidden;
-    max-width: device-width;
 }
 
 .ruler {
@@ -34,10 +33,6 @@ body {
 	font-family: verdana;
 	font-size: 18px;
 	color: #FF69B4;
-}
-/* set the width of the search box */
-.search-box {
-	width: 300px;
 }
 
 /* style for info window on marker*/

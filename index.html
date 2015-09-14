@@ -28,15 +28,16 @@
 
       <div class="row">
 
-        <div class="col-xs-4">
-          <div id="panel" style="margin-left: 40px">
-            <h6>Search: <input id="autocomplete" class="search-box"
-              data-bind="value: search, valueUpdate: 'afterKeyDown'"/>
-            </h6>
+        <div class="col-md-3">
+          <div id="panel">
+            <h4>Search: <input id="autocomplete" class="search-box"
+                            data-bind="value: search, valueUpdate: 'afterKeyDown'"
+                            style="width:230px; height: 30px" />
+            </h4>
           </div>
         </div>
 
-        <div class="col-xs-8">
+        <div class="col-md-9">
           <div id="map" class="row map-style"></div>
             <script src="js/knockout-3.3.0.js"></script>
             <script src="https://maps.googleapis.com/maps/api/js?callback=initMap"></script>
