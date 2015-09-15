@@ -28,12 +28,19 @@
       </div>
 
       <div class="row">
+            <span class="col-md-1 search-text">Search:
+            </span>
+            <input id="autocomplete" class="col-md-11 search-box"
+                  data-bind="value: search, valueUpdate: 'afterkeydown'"/>
+      </div>
+
+      <div class="row">
 
         <div class="col-md-3">
-            <span class="search-text">Search:
-            </span>
-              <input id="autocomplete" class="search-box"
-                            data-bind="value: search, valueUpdate: 'afterKeyDown'"/>
+          <ul data-bind="foreach: locations">
+            <li data-bind="text: name, value=search, valueUpdate:'afterkeydown'"></li>
+          </ul>
+              <!-- <input type="text" data-bind="value: search, valueUpdate: 'afterkeydown'" /> -->
         </div>
 
         <div class="col-md-9">

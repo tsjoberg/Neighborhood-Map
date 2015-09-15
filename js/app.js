@@ -387,7 +387,7 @@ function handleYelpData(data) {
 
 
 		allMarkers.push(markerData);
-		console.log("trying to display: " + markerData.name);
+		//console.log("trying to display: " + markerData.name);
 		displayMarker(markerData);
 
 	} else {
@@ -407,41 +407,45 @@ function getSearchFriendlyData() {
 }
 
 // our knockout obervable object
-function Location(name, latitude, longitude, content, visible, type) {
+function Location(name, visible, type) {
 	this.name = ko.observable(name);
-	this.latitude = ko.observable(latitude);
-	this.longitude = ko.observable(longitude);
-	this.content = ko.observable(content);
 	this.visible = ko.observable(visible);
 	this.type = ko.observable(type);
 }
 
 // our view model for knockout js
-var viewModel = {
-	locations: ko.observableArray([]),
-	search: ko.observable('')
-	};
-// search on the names adn filter on the matches as the user types the search text
-viewModel.firstMatch = ko.dependentObservable(function() {
-	var search = this.search().toLowerCase();
+function viewModel() {
+	var self = this;
+
+	self.search = ko.observable('');
+
+	self.filter = ko.observable('');
+
+	self.locations = ko.utils.arrayMap(allData, function(item) {
+		return new Location(item.name, item.visible, item.type);
+	});
+
+	// search on the names and filter on the matches as the user types the search text
+	self.firstMatch = ko.dependentObservable(function() {
+
+	var search = self.search().toLowerCase();
 	if (!search) {
-		return this.locations();
+		return self.locations;
 	} else {
-		return ko.utils.arrayFilter(this.locations(), function(location){
-			//var val = location.name().toLowerCase().indexOf(search) !== -1
-			//console.log("val = " + val);
+		return ko.utils.arrayFilter(self.locations, function(location){
 			return location.name().toLowerCase().indexOf(search) !== -1;
 		});
 	}
 
 }, viewModel);
+};
+
+
 
 // our obervable mapped location data
-var mappedData = ko.utils.arrayMap(allData, function(item) {
-	return new Location(item.name, item.latitude, item.longitude, item.content, item.visible, item.type);
-});
+var mappedData =
 
-viewModel.locations(mappedData);
+//viewModel.locations(mappedData);
 
 $(document).ready(function() {
 	// apply the knockour bindings
