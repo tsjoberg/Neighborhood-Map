@@ -63,6 +63,7 @@ function initMap() {
 }
 
 function displayMarker(markersArray) {
+	// TODO: check for fail alert and send it via infowindow to the user
 	var yelpArray = markersArray;
 	var lat = yelpArray.latitude;
 	var lng = yelpArray.longitude;
@@ -115,43 +116,6 @@ function clearMarkers() {
 	markers = [];
 }
 
-// display markers on the map as requested by type
-// determined by the button clicked
-function drop(buttonId) {
-	if (buttonId == HOTEL_TYPE) {
-		setVisibleMarkers(HOTEL_TYPE);
-		displayMarkers(getVisibleMarkers());
-	} else if (buttonId == MALL_TYPE) {
-		setVisibleMarkers(MALL_TYPE);
-		displayMarkers(getVisibleMarkers());
-	} else if (buttonId == LANDMARK_TYPE) {
-		setVisibleMarkers(LANDMARK_TYPE);
-		displayMarkers(getVisibleMarkers());
-	} else if (buttonId == RETAIL_TYPE) {
-		setVisibleMarkers(RETAIL_TYPE);
-		displayMarkers(getVisibleMarkers());
-	} else if (buttonId == BANK_TYPE) {
-		setVisibleMarkers(BANK_TYPE);
-		displayMarkers(getVisibleMarkers());
-	} else if (buttonId == RESTAURANT_TYPE) {
-		setVisibleMarkers(RESTAURANT_TYPE);
-		displayMarkers(getVisibleMarkers());
-	}
-}
-
-// set markers of the given type to visible in our allMarkers array
-function setVisibleMarkers(type) {
-	var len = allMarkers.length;
-	for (var i = 0; i < len; i++) {
-		var marker = allMarkers[i];
-		if (marker.type == type) {
-			marker.visible = true;
-		} else {
-			marker.visible = false;
-		}
-	}
-}
-
 // get an array of markers of the requested type
 // from the allMarkers array populated by our yelp call
 function getVisibleMarkers() {
@@ -168,12 +132,12 @@ function getVisibleMarkers() {
 
 // get the array of markers with the requested name and type
 // from allMarkers array populated by our yelp call
-function getVisibleMarkersByPOI(name, type) {
+function getVisibleMarkersByPOI(name) {
 	var poiMarkers = [];
 	var len = allMarkers.length;
 	for (var i = 0; i < len; i++) {
 		var marker = allMarkers[i];
-		if (marker.name == name &&  marker.type == type) {
+		if (marker.name == name) {
 			marker.visible = true;
 			poiMarkers.push(marker);
 		} else {
@@ -231,19 +195,6 @@ function callYelp(business) {
 
 // an array to store marker data from
 var allMarkers = [];
-
-// get the subset array of data of the requested 'type'
-function getType(type) {
-	var types = [];
-	var length = locations.length;
-	for (var i = 0; i < length; i++) {
-		var data = locations[i];
-		if (data.type == type) {
-			types.push(data);
-		}
-	}
-	return types;
-}
 
 // callback function that handles yelp data
 // to populate our markers with
@@ -303,73 +254,6 @@ function handleYelpData(data) {
 		var rating = business.rating;
 		var snippetText = business.snippet_text;
 		var address = business.location.display_address[0] + "<br>" + business.location.display_address[business.location.display_address.length - 1];
-		var type;
-
-		// set hotel type in marker
-		var hotelTypes = getType(HOTEL_TYPE);
-		var hlength = hotelTypes.length;
-		for (var i = 0; i < hlength; i++) {
-			var hotelName = hotelTypes[i].name.toLowerCase();
-			var markerName = name.toLowerCase();
-			if (markerName.indexOf(hotelName) != -1) {
-				type = HOTEL_TYPE;
-			}
-		}
-
-		//set mall type for marker
-		var mallTypes = getType(MALL_TYPE);
-		var mlength = mallTypes.length;
-		for (var j = 0; j < mlength; j++) {
-			var mallName = mallTypes[j].name.toLowerCase();
-			var markerName = name.toLowerCase();
-			if (markerName.indexOf(mallName) != -1) {
-				type = MALL_TYPE;
-			}
-		}
-
-		// set retail type for marker
-		var retailTypes = getType(RETAIL_TYPE);
-		var rlength = retailTypes.length;
-		for (var k = 0; k < rlength; k++) {
-			var retailName = retailTypes[k].name.toLowerCase();
-			var markerName = name.toLowerCase();
-			if (markerName.indexOf(retailName) != -1) {
-				type = RETAIL_TYPE;
-			}
-		}
-
-		// set bank type for marker
-		var bankTypes = getType(BANK_TYPE);
-		var blength = bankTypes.length;
-		for (var a = 0; a < blength; a++) {
-			var bankName = bankTypes[a].name.toLowerCase();
-			var markerName = name.toLowerCase();
-			if (markerName.indexOf(bankName) != -1) {
-				type = BANK_TYPE;
-			}
-		}
-
-		// set food/restaurant type for marker
-		var foodTypes = getType(RESTAURANT_TYPE);
-		var flength = foodTypes.length;
-		for (var b = 0; b < flength; b++) {
-			var foodName = foodTypes[b].name.toLowerCase();
-			var markerName = name.toLowerCase();
-			if (markerName.indexOf(foodName) != -1) {
-				type = RESTAURANT_TYPE;
-			}
-		}
-
-		// set landmark type for marker
-		var landmarkTypes = getType(LANDMARK_TYPE);
-		var llength = landmarkTypes.length;
-		for (var c = 0; c < llength; c++) {
-			var landmarkName = landmarkTypes[c].name.toLowerCase();
-			var markerName = name.toLowerCase();
-			if (markerName.indexOf(landmarkName) != -1) {
-				type = LANDMARK_TYPE;
-			}
-		}
 
 		var markerData = {"name": name,
 							"latitude": lat,
@@ -377,7 +261,6 @@ function handleYelpData(data) {
 							"mobileUrl": mobileUrl,
 							"rating": rating,
 							"imageUrl": imageUrl,
-							"type": type,
 							"snippetText": snippetText,
 							"address": address,
 							"stars": stars,
@@ -391,52 +274,42 @@ function handleYelpData(data) {
 		displayMarker(markerData);
 
 	} else {
+		// TODO: send fail alert to infowindow view markerData or similar array
 		console.log("Unable to obain yelp data for: " + data);
 	}
 }
 
-// the locations name is the keyword on which our search works
-// this method call returns an array of our interested locations names
-function getSearchFriendlyData() {
-	var length = locations.length;
-	var searchFriendly = [];
-	for (var i = 0; i < length; i++) {
-		searchFriendly = searchFriendly.concat(locations[i].name);
-	}
-	return searchFriendly;
-}
-
 	// all the data to be displayed by the markers
 var locations = [
-	{ name: "The Drake Hotel", visible: "true", type: HOTEL_TYPE },
-	{ name: "Park Hyatt Chicago", visible: "true", type: HOTEL_TYPE },
-	{ name: "Warwick Allerton Hotel Chicago", visible: "true", type: HOTEL_TYPE },
-	{ name: "Omni Chicago Hotel", visible: "true", type: HOTEL_TYPE },
-	{ name: "Tribune Tower", visible: "true", type: LANDMARK_TYPE },
-	{ name: "Michigan Avenue Bridge", visible: "true", type: LANDMARK_TYPE },
-	{ name: "John Hancock Center", visible: "true", type: LANDMARK_TYPE },
-	{ name: "The Magnificent Mile", visible: "true", type: LANDMARK_TYPE },
-	{ name: "Bloomingdale's", visible: "true", type: RETAIL_TYPE },
-	{ name: "Burberry", visible: "true", type: RETAIL_TYPE },
-	{ name: "Chanel Boutique", visible: "true", type: RETAIL_TYPE },
-	{ name: "Coach", visible: "true",type: RETAIL_TYPE },
-	{ name: "Louis Vuitton", visible: "true", type: RETAIL_TYPE },
-	{ name: "Tumi Luggage", visible: "true", type: RETAIL_TYPE },
-	{ name: "Saks Fifth Avenue", visible: "true", type: RETAIL_TYPE },
-	{ name: "Tiffany & Co", visible: "true", type: RETAIL_TYPE },
-	{ name: "Cartier", visible: "true", type: RETAIL_TYPE},
-	{ name: "Water Tower Place", visible: "true", type: MALL_TYPE },
-	{ name: "The Shops at North Bridge", visible: "true", type: MALL_TYPE},
-	{ name: "The 900 Shops", visible: "true", type: MALL_TYPE },
-	{ name: "Chase Bank", visible: "true", type: BANK_TYPE },
-	{ name: "Citibank", visible: "true", type: BANK_TYPE },
-	{ name: "Bank of America", visible: "true", type: BANK_TYPE },
-	{ name: "The Purple Pig", visible: "true", type: RESTAURANT_TYPE },
-	{ name: "NoMI Kitchen", visible: "true", type: RESTAURANT_TYPE },
-	{ name: "Bandera Restaurant", visible: "true", type: RESTAURANT_TYPE },
-	{ name: "The Signature Room at the 95th", visible: "true", type: RESTAURANT_TYPE },
-	{ name: "Grand Lux Cafe", visible: "true", type: RESTAURANT_TYPE },
-	{ name: "Foodlife", visible: "true", type: RESTAURANT_TYPE }
+	{ name: "The Drake Hotel", visible: "true" },
+	{ name: "Park Hyatt Chicago", visible: "true" },
+	{ name: "Warwick Allerton Hotel Chicago", visible: "true" },
+	{ name: "Omni Chicago Hotel", visible: "true" },
+	{ name: "Tribune Tower", visible: "true" },
+	{ name: "Michigan Avenue Bridge", visible: "true" },
+	{ name: "John Hancock Center", visible: "true" },
+	{ name: "The Magnificent Mile", visible: "true" },
+	{ name: "Bloomingdale's", visible: "true" },
+	{ name: "Burberry", visible: "true" },
+	{ name: "Chanel Boutique", visible: "true" },
+	{ name: "Coach", visible: "true" },
+	{ name: "Louis Vuitton", visible: "true" },
+	{ name: "Tumi Luggage", visible: "true" },
+	{ name: "Saks Fifth Avenue", visible: "true" },
+	{ name: "Tiffany & Co", visible: "true" },
+	{ name: "Cartier", visible: "true" },
+	{ name: "Water Tower Place", visible: "true" },
+	{ name: "The Shops at North Bridge", visible: "true" },
+	{ name: "The 900 Shops", visible: "true" },
+	{ name: "Chase Bank", visible: "true" },
+	{ name: "Citibank", visible: "true" },
+	{ name: "Bank of America", visible: "true" },
+	{ name: "The Purple Pig", visible: "true" },
+	{ name: "NoMI Kitchen", visible: "true" },
+	{ name: "Bandera Restaurant", visible: "true" },
+	{ name: "The Signature Room at the 95th", visible: "true" },
+	{ name: "Grand Lux Cafe", visible: "true" },
+	{ name: "Foodlife", visible: "true" }
 ];
 
 // our view model for knockout js
@@ -447,12 +320,13 @@ var viewModel = {
 
 	query: ko.observable(''),
 
+	// credit: http://opensoul.org/2011/06/23/live-search-with-knockoutjs/
 	search: function(value) {
         viewModel.beers.removeAll();
         for(var x in locations) {
           if(locations[x].name.toLowerCase().indexOf(value.toLowerCase()) >= 0) {
             viewModel.beers.push(locations[x]);
-            displayMarkers()
+            //displayMarkers()
           }
 
         }
@@ -464,29 +338,6 @@ viewModel.query.subscribe(viewModel.search);
 $(document).ready(function() {
 	// apply the knockout bindings
 	ko.applyBindings(viewModel);
-
-    // autocomplete jqueryui widget implementation for our searchable points of interest
-    $( "#autocomplete" ).autocomplete({
- 		source: getSearchFriendlyData()
-	});
-
-    // when enter key is pressed, we grab the user selection
-    $('#autocomplete').on('autocompleteselect', function(e, ui) {
-    	// 13 == enter key
-    	if (e.which == 13) {
-			//get the proper object
-			var length = locations.length;
-			var currentData;
-			for (var i = 0; i < length; i++) {
-				currentData = locations[i];
-				//console.log("currentData = " + currentData.content);
-				if (ui.item.label == currentData.name) {
-					break;
-				}
-			}
-			displayMarkers(getVisibleMarkersByPOI(currentData.name, currentData.type));
-    	}
-    });
 
     var numData = locations.length;
     for (var i = 0; i < numData; i++) {
