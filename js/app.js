@@ -314,7 +314,8 @@ var locations = [
 
 // our view model for knockout js
 var viewModel = {
-	testLocations: ko.observableArray(locations),
+
+	yelps: ko.observableArray(allMarkers),
 
 	beers: ko.observableArray(locations),
 
@@ -322,13 +323,23 @@ var viewModel = {
 
 	// credit: http://opensoul.org/2011/06/23/live-search-with-knockoutjs/
 	search: function(value) {
+		viewModel.yelps.removeAll();
         viewModel.beers.removeAll();
+        clearMarkers();
         for(var x in locations) {
           if(locations[x].name.toLowerCase().indexOf(value.toLowerCase()) >= 0) {
             viewModel.beers.push(locations[x]);
-            //displayMarkers()
-          }
+            // note that this is not a full name
+            // do this outside this x loop with the help of beers
+            var n = locations[x].name.toLowerCase();
 
+            for (var i = 0; i < allMarkers.length; i++) {
+            	if (allMarkers[i].name.toLowerCase() === n) {
+            		viewModel.yelps.push(allMarkers[i]);
+            		displayMarker(allMarkers[i]);
+            	}
+            }
+          }
         }
       }
 };
