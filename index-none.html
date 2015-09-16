@@ -32,9 +32,9 @@
 
           <br><br>
           <div class="content">
-            <ul data-bind="template: {name:'place', foreach:places, templateOptions: {vmMethod: infoWindow}}">
+            <ul data-bind="template: {name:'place', foreach:places}">
               <script type="text/html" id="place">
-                <li><a href="#" data-bind="text: name, click: $item.vmMethod"></a>
+                <li><a href="#" data-bind="text: name"></a>
                 </li>
               </script>
             </ul>
