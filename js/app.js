@@ -235,9 +235,9 @@ var allMarkers = [];
 // get the subset array of data of the requested 'type'
 function getType(type) {
 	var types = [];
-	var length = allData.length;
+	var length = locations.length;
 	for (var i = 0; i < length; i++) {
-		var data = allData[i];
+		var data = locations[i];
 		if (data.type == type) {
 			types.push(data);
 		}
@@ -398,58 +398,72 @@ function handleYelpData(data) {
 // the locations name is the keyword on which our search works
 // this method call returns an array of our interested locations names
 function getSearchFriendlyData() {
-	var length = allData.length;
+	var length = locations.length;
 	var searchFriendly = [];
 	for (var i = 0; i < length; i++) {
-		searchFriendly = searchFriendly.concat(allData[i].name);
+		searchFriendly = searchFriendly.concat(locations[i].name);
 	}
 	return searchFriendly;
 }
 
-// our knockout obervable object
-function Location(name, visible, type) {
-	this.name = ko.observable(name);
-	this.visible = ko.observable(visible);
-	this.type = ko.observable(type);
-}
+	// all the data to be displayed by the markers
+var locations = [
+	{ name: "The Drake Hotel", visible: "true", type: HOTEL_TYPE },
+	{ name: "Park Hyatt Chicago", visible: "true", type: HOTEL_TYPE },
+	{ name: "Warwick Allerton Hotel Chicago", visible: "true", type: HOTEL_TYPE },
+	{ name: "Omni Chicago Hotel", visible: "true", type: HOTEL_TYPE },
+	{ name: "Tribune Tower", visible: "true", type: LANDMARK_TYPE },
+	{ name: "Michigan Avenue Bridge", visible: "true", type: LANDMARK_TYPE },
+	{ name: "John Hancock Center", visible: "true", type: LANDMARK_TYPE },
+	{ name: "The Magnificent Mile", visible: "true", type: LANDMARK_TYPE },
+	{ name: "Bloomingdale's", visible: "true", type: RETAIL_TYPE },
+	{ name: "Burberry", visible: "true", type: RETAIL_TYPE },
+	{ name: "Chanel Boutique", visible: "true", type: RETAIL_TYPE },
+	{ name: "Coach", visible: "true",type: RETAIL_TYPE },
+	{ name: "Louis Vuitton", visible: "true", type: RETAIL_TYPE },
+	{ name: "Tumi Luggage", visible: "true", type: RETAIL_TYPE },
+	{ name: "Saks Fifth Avenue", visible: "true", type: RETAIL_TYPE },
+	{ name: "Tiffany & Co", visible: "true", type: RETAIL_TYPE },
+	{ name: "Cartier", visible: "true", type: RETAIL_TYPE},
+	{ name: "Water Tower Place", visible: "true", type: MALL_TYPE },
+	{ name: "The Shops at North Bridge", visible: "true", type: MALL_TYPE},
+	{ name: "The 900 Shops", visible: "true", type: MALL_TYPE },
+	{ name: "Chase Bank", visible: "true", type: BANK_TYPE },
+	{ name: "Citibank", visible: "true", type: BANK_TYPE },
+	{ name: "Bank of America", visible: "true", type: BANK_TYPE },
+	{ name: "The Purple Pig", visible: "true", type: RESTAURANT_TYPE },
+	{ name: "NoMI Kitchen", visible: "true", type: RESTAURANT_TYPE },
+	{ name: "Bandera Restaurant", visible: "true", type: RESTAURANT_TYPE },
+	{ name: "The Signature Room at the 95th", visible: "true", type: RESTAURANT_TYPE },
+	{ name: "Grand Lux Cafe", visible: "true", type: RESTAURANT_TYPE },
+	{ name: "Foodlife", visible: "true", type: RESTAURANT_TYPE }
+];
 
 // our view model for knockout js
-function viewModel() {
-	var self = this;
+var viewModel = {
+	testLocations: ko.observableArray(locations),
 
-	self.search = ko.observable('');
+	beers: ko.observableArray(locations),
 
-	self.filter = ko.observable('');
+	query: ko.observable(''),
 
-	self.locations = ko.utils.arrayMap(allData, function(item) {
-		return new Location(item.name, item.visible, item.type);
-	});
+	search: function(value) {
+        viewModel.beers.removeAll();
+        for(var x in locations) {
+          if(locations[x].name.toLowerCase().indexOf(value.toLowerCase()) >= 0) {
+            viewModel.beers.push(locations[x]);
+            displayMarkers()
+          }
 
-	// search on the names and filter on the matches as the user types the search text
-	self.firstMatch = ko.dependentObservable(function() {
-
-	var search = self.search().toLowerCase();
-	if (!search) {
-		return self.locations;
-	} else {
-		return ko.utils.arrayFilter(self.locations, function(location){
-			return location.name().toLowerCase().indexOf(search) !== -1;
-		});
-	}
-
-}, viewModel);
+        }
+      }
 };
 
-
-
-// our obervable mapped location data
-var mappedData =
-
-//viewModel.locations(mappedData);
+viewModel.query.subscribe(viewModel.search);
 
 $(document).ready(function() {
-	// apply the knockour bindings
-    ko.applyBindings(viewModel);
+	// apply the knockout bindings
+	ko.applyBindings(viewModel);
 
     // autocomplete jqueryui widget implementation for our searchable points of interest
     $( "#autocomplete" ).autocomplete({
@@ -461,10 +475,10 @@ $(document).ready(function() {
     	// 13 == enter key
     	if (e.which == 13) {
 			//get the proper object
-			var length = allData.length;
+			var length = locations.length;
 			var currentData;
 			for (var i = 0; i < length; i++) {
-				currentData = allData[i];
+				currentData = locations[i];
 				//console.log("currentData = " + currentData.content);
 				if (ui.item.label == currentData.name) {
 					break;
@@ -474,157 +488,9 @@ $(document).ready(function() {
     	}
     });
 
-    var numData = allData.length;
+    var numData = locations.length;
     for (var i = 0; i < numData; i++) {
-    	var currentData = allData[i];
+    	var currentData = locations[i];
     	callYelp(currentData.name);
     }
 });
-
-// all the data to be displayed by the markers
-var allData = [
-		{
-			name: "The Drake Hotel",
-			visible: true,
-			type: HOTEL_TYPE
-		},
-		{
-			name: "Park Hyatt Chicago",
-			visible: true,
-			type: HOTEL_TYPE
-		},
-		{
-			name: "Warwick Allerton Hotel Chicago",
-			visible: true,
-			type: HOTEL_TYPE
-		},
-		{
-			name: "Omni Chicago Hotel",
-			visible: true,
-			type: HOTEL_TYPE
-		},
-		{
-			name: "Tribune Tower",
-			visible: true,
-			type: LANDMARK_TYPE
-		},
-		{
-			name: "Michigan Avenue Bridge",
-			visible: true,
-			type: LANDMARK_TYPE
-		},
-		{
-			name: "John Hancock Center",
-			visible: true,
-			type: LANDMARK_TYPE
-		},
-		{
-			name: "The Magnificent Mile",
-			visible: true,
-			type: LANDMARK_TYPE
-		},
-		{
-			name: "Bloomingdale's",
-			visible: true,
-			type: RETAIL_TYPE
-		},
-		{
-			name: "Burberry",
-			visible: true,
-			type: RETAIL_TYPE
-		},
-		{
-			name: "Chanel Boutique",
-			visible: true,
-			type: RETAIL_TYPE
-		},
-		{
-			name: "Coach",
-			visible: true,
-			type: RETAIL_TYPE
-		},
-		{
-			name: "Louis Vuitton",
-			visible: true,
-			type: RETAIL_TYPE
-		},
-		{
-			name: "Tumi Luggage",
-			visible: true,
-			type: RETAIL_TYPE
-		},
-		{
-			name: "Saks Fifth Avenue",
-			visible: true,
-			type: RETAIL_TYPE
-		},
-		{
-			name: "Tiffany & Co",
-			visible: true,
-			type: RETAIL_TYPE
-		},
-		{
-			name: "Cartier",
-			visible: true,
-			type: RETAIL_TYPE
-		},
-		{	name: "Water Tower Place",
-			visible: true,
-			type: MALL_TYPE
-		},
-		{
-			name: "The Shops at North Bridge",
-			visible: true,
-			type: MALL_TYPE
-		},
-		{
-			name: "The 900 Shops",
-			visible: true,
-			type: MALL_TYPE
-		},
-		{
-			name: "Chase Bank",
-			visible: true,
-			type: BANK_TYPE
-		},
-		{
-			name: "Citibank",
-			visible: true,
-			type: BANK_TYPE
-		},
-		{
-			name: "Bank of America",
-			visible: true,
-			type: BANK_TYPE
-		},
-		{
-			name: "The Purple Pig",
-			visible: true,
-			type: RESTAURANT_TYPE
-		},
-		{
-			name: "NoMI Kitchen",
-			visible: true,
-			type: RESTAURANT_TYPE
-		},
-		{
-			name: "Bandera Restaurant",
-			visible: true,
-			type: RESTAURANT_TYPE
-		},
-		{
-			name: "The Signature Room at the 95th",
-			visible: true,
-			type: RESTAURANT_TYPE
-		},
-		{
-			name: "Grand Lux Cafe",
-			visible: true,
-			type: RESTAURANT_TYPE
-		},
-		{
-			name: "Foodlife",
-			visible: true,
-			type: RESTAURANT_TYPE
-		}
-	];
