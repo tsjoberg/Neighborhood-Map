@@ -62,7 +62,7 @@ function initMap() {
   	path.setMap(map);
 }
 
-function displayMarker(markersArray) {
+function displayMarker(markersArray, popOpen) {
 	// TODO: check for fail alert and send it via infowindow to the user
 	var yelpArray = markersArray;
 	var lat = yelpArray.latitude;
@@ -90,13 +90,23 @@ function displayMarker(markersArray) {
 	var infoWindow = new google.maps.InfoWindow({
 							content: displayElement
 						});
-
+	if(popOpen === true) {
+		infoWindow.open(map, marker);
+	}
 	// anonymous function to help tag proper content window to each marker
-	google.maps.event.addListener(marker, 'click', function(handle, pop) {
+	google.maps.event.addListener(marker, 'mouseover', function(handle, pop) {
 		return function() {
 			pop.open(map, handle);
 		};
 	}(marker, infoWindow));
+
+		// anonymous function to help tag proper content window to each marker
+	google.maps.event.addListener(marker, 'mouseout', function(handle, pop) {
+		return function() {
+			pop.close();
+		};
+	}(marker, infoWindow));
+
 }
 
 //display asked for markers on the google map
@@ -104,7 +114,7 @@ function displayMarkers(markersArray) {
 	// this clears the google map array of markers
 	clearMarkers();
 	for (var j = 0; j < markersArray.length; j++) {
-		displayMarker(markersArray[j]);
+		displayMarker(markersArray[j], false);
 	}
 }
 
@@ -312,31 +322,43 @@ var locations = [
 	{ name: "Foodlife", visible: "true" }
 ];
 
+function displayInfoWindow(name) {
+	console.log("name = " + name);
+	for (var i = 0; i < allMarkers.length; i++) {
+		if (allMarkers[i].name.toLowerCase() === name) {
+			clearMarkers();
+			displayMarker(allMarkers[i], true);
+		}
+	}
+}
+
 // our view model for knockout js
 var viewModel = {
 
 	yelps: ko.observableArray(allMarkers),
 
-	beers: ko.observableArray(locations),
+	places: ko.observableArray(locations),
+
+	infoWindow: function(item) {
+		displayInfoWindow(item.name.toLowerCase());
+	},
 
 	query: ko.observable(''),
 
 	// credit: http://opensoul.org/2011/06/23/live-search-with-knockoutjs/
 	search: function(value) {
 		viewModel.yelps.removeAll();
-        viewModel.beers.removeAll();
+        viewModel.places.removeAll();
         clearMarkers();
         for(var x in locations) {
           if(locations[x].name.toLowerCase().indexOf(value.toLowerCase()) >= 0) {
-            viewModel.beers.push(locations[x]);
-            // note that this is not a full name
-            // do this outside this x loop with the help of beers
+            viewModel.places.push(locations[x]);
             var n = locations[x].name.toLowerCase();
-
-            for (var i = 0; i < allMarkers.length; i++) {
+            var numMarkers = allMarkers.length;
+            for (var i = 0; i < numMarkers; i++) {
             	if (allMarkers[i].name.toLowerCase() === n) {
             		viewModel.yelps.push(allMarkers[i]);
-            		displayMarker(allMarkers[i]);
+            		displayMarker(allMarkers[i], false);
             	}
             }
           }
