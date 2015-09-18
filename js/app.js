@@ -96,17 +96,29 @@ function displayMarker(markersArray, popOpen) {
 	// anonymous function to help tag proper content window to each marker
 	google.maps.event.addListener(marker, 'mouseover', function(handle, pop) {
 		return function() {
+			toggleBounce(marker);
 			pop.open(map, handle);
+
 		};
 	}(marker, infoWindow));
 
 		// anonymous function to help tag proper content window to each marker
 	google.maps.event.addListener(marker, 'mouseout', function(handle, pop) {
 		return function() {
+			toggleBounce(marker);
 			pop.close();
 		};
 	}(marker, infoWindow));
 
+
+}
+
+function toggleBounce(marker) {
+  if (marker.getAnimation() !== null) {
+    marker.setAnimation(null);
+  } else {
+    marker.setAnimation(google.maps.Animation.BOUNCE);
+  }
 }
 
 //display asked for markers on the google map
@@ -348,12 +360,13 @@ var viewModel = {
 	// credit: http://opensoul.org/2011/06/23/live-search-with-knockoutjs/
 	search: function(value) {
 		viewModel.yelps.removeAll();
-        viewModel.places.removeAll();
+        var originalLocations = viewModel.places.removeAll();
         clearMarkers();
-        for(var x in locations) {
-          if(locations[x].name.toLowerCase().indexOf(value.toLowerCase()) >= 0) {
-            viewModel.places.push(locations[x]);
-            var n = locations[x].name.toLowerCase();
+		//console.log("locations array = " + originalLocations);
+        for(var x in originalLocations) {
+          if(originalLocations[x].name.toLowerCase().indexOf(value.toLowerCase()) >= 0) {
+            viewModel.places.push(originalLocations[x]);
+            var n = originalLocations[x].name.toLowerCase();
             var numMarkers = allMarkers.length;
             for (var i = 0; i < numMarkers; i++) {
             	if (allMarkers[i].name.toLowerCase() === n) {
