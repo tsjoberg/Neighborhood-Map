@@ -299,12 +299,11 @@ var viewModel = {
 
 	// credit: http://opensoul.org/2011/06/23/live-search-with-knockoutjs/
 	search: function(value) {
-		console.log("value = " + value);
+		//console.log("value = " + value);
 		//if (value == '') return;
 		viewModel.yelps.removeAll();
         viewModel.locations.removeAll();
         clearMarkers();
-		//console.log("locations array = " + originalLocations);
         for(var x in locations) {
 			if(locations[x].name.toLowerCase().indexOf(value.toLowerCase()) >= 0) {
 				viewModel.locations.push(locations[x]);
@@ -333,4 +332,31 @@ $(document).ready(function() {
     	// call Yelp api to get data for the infowindow
     	callYelp(currentData.name);
     }
+
+    callWeatherUnderground();
 });
+
+
+function callWeatherUnderground() {
+	$.ajax({
+		url : "http://api.wunderground.com/api/117f669b717366bc/geolookup/conditions/q/IA/Chicago.json",
+		dataType : "jsonp",
+		success : handleWeatherUnderground
+	}).fail(function(XMLHttpRequest, status, error) {
+			console.log("Could not get Chicago weather report");
+	});
+}
+
+function handleWeatherUnderground(data) {
+	console.log("temp = " + data['current_observation']['temp_f']);
+	var $weather = $("#wu-weather");
+	//console.log($weather);
+	$weather.append('<span><b>Temperature: </b>'
+		+ data['current_observation']['temp_f']
+		+ '<b> F </b>, '
+		+ '<b> Wind: </b>'
+		+ data['current_observation']['wind_string']
+		+ '<b>, Current Conditions: </b>'
+		+ data['current_observation']['weather']
+		+ '</span>');
+}

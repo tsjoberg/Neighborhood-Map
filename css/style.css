@@ -4,18 +4,14 @@ body {
 	height: 100vw;
 	margin: 0;
 	padding: 10px;
+	font-family: verdana;
 	font-size: 5vw;
 }
 
-/* font relative to device */
-.h6 {
-	font-size: 4vw;
-	font-family: verdana;
-}
 /* set the map width and height*/
 .map-style {
 	position: relative;
-    padding-bottom: 85%; // This is the aspect ratio
+    padding-bottom: 80%; // This is the aspect ratio
     overflow: hidden;
     width: 100%;
 }
@@ -33,11 +29,16 @@ body {
 }
 
 .header {
-	font-family: verdana;
-	font-size: 20px;
+	font-size: 24px;
+	font-weight: bolder;
 	color: #1414c0;
 	text-align: center;
-	width: 100%;
+}
+
+.weather {
+	font-size: 10px;
+	color: #1414c0;
+	text-align: center;
 }
 
 .search-text {

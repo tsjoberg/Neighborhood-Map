@@ -21,24 +21,14 @@
     <div class="container">
 
       <div class="row header">
-        <span>Chicago's Magnificent Mile</span>
-        <hr class="ruler">
+        <span>The Magnificent Mile, Chicago</span>
       </div>
+      <div class="row weather" id="wu-weather">
+        <label></label>
+      </div>
+      <hr class="ruler">
 
       <div class="row">
-          <input placeholder="Search…" type="text" class="search-text"
-              data-bind="value: query, valueUpdate: 'keyup'" autocomplete="off">
-      </div>
-
-      <div class="row">
-
-        <div class="col-md-3">
-            <ul data-bind="foreach: locations">
-                <li>
-                  <a href="#" data-bind="text: name, click: $parent.infoWindow"></a>
-                </li>
-            </ul>
-        </div>
 
         <div class="col-md-9">
           <div id="map" class="row map-style"></div>
@@ -47,9 +37,22 @@
             <script src="js/app.js"></script>
         </div>
 
+        <div class="col-md-3">
+
+          <input placeholder="Search…" type="text" class="search-text"
+              data-bind="value: query, valueUpdate: 'keyup'" autocomplete="off">
+
+              <br><br><br>
+            <ul data-bind="foreach: locations">
+                <li>
+                  <a href="#" data-bind="text: name, click: $parent.infoWindow"></a>
+                </li>
+            </ul>
+        </div>
+
       </div>
 
-    </div>
+  </div>
 
   </body>
 </html>
