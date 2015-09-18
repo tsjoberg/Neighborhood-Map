@@ -11,19 +11,7 @@
  * @author Samata Bulusu
 */
 
-// constant for hotel type
-var HOTEL_TYPE = 'hotel';
-// constant for mall type
-var MALL_TYPE = 'mall';
-// constant for landmark tyoe
-var LANDMARK_TYPE = 'landmark';
-// constant for retail type
-var RETAIL_TYPE = 'retail';
-// constant for bank type
-var BANK_TYPE = 'bank';
-// constant for restaurant type
-var RESTAURANT_TYPE = 'food';
-// an array to contain all markers
+// an array to contain all markers of type google marker
 var markers = [];
 // handle to the google map
 var map;
@@ -49,8 +37,6 @@ function initMap() {
 		center: centerMapCoordinates
 
 	});
-	// all interested locations markers to be dropped when map is initiated
-	//drop(ALL_TYPE);
 	// draw a polyline for magnificent mile in google maps
 	var path = new google.maps.Polyline({
 	    path: neighborhoodCoordinates,
@@ -62,6 +48,10 @@ function initMap() {
   	path.setMap(map);
 }
 
+/*  display the markers in the array in google maps map
+	markersArray - the markers to be displayed
+	popOpen - if true, pop the infowindow for the marker open
+*/
 function displayMarker(markersArray, popOpen) {
 	// TODO: check for fail alert and send it via infowindow to the user
 	var yelpArray = markersArray;
@@ -73,8 +63,11 @@ function displayMarker(markersArray, popOpen) {
 							animation: google.maps.Animation.DROP,
 							title: yelpArray.name
 							});
+
 	marker.setVisible(yelpArray.visible);
+
 	markers.push(marker);
+
 	var displayElement = '<div class="info-window"><h6>' +
 							yelpArray.name + '</h6>' +
 							yelpArray.address + '<p>' + yelpArray.displayPhone  +
@@ -90,38 +83,50 @@ function displayMarker(markersArray, popOpen) {
 	var infoWindow = new google.maps.InfoWindow({
 							content: displayElement
 						});
+
+	// when links in list view are clicked, infowindow should pop
 	if(popOpen === true) {
 		infoWindow.open(map, marker);
 	}
-	// anonymous function to help tag proper content window to each marker
-	google.maps.event.addListener(marker, 'mouseover', function(handle, pop) {
+
+	// anonymous function to open infowindow when marker is clicked
+	google.maps.event.addListener(marker, 'click', function(handle, pop) {
 		return function() {
-			toggleBounce(marker);
+			// marker bounces when user clicks on the marker
+			animate(marker);
 			pop.open(map, handle);
 
 		};
 	}(marker, infoWindow));
 
-		// anonymous function to help tag proper content window to each marker
+	// anonymous function to close the infowindow, when mouse moves out
 	google.maps.event.addListener(marker, 'mouseout', function(handle, pop) {
 		return function() {
-			toggleBounce(marker);
 			pop.close();
 		};
 	}(marker, infoWindow));
-
-
 }
 
-function toggleBounce(marker) {
-  if (marker.getAnimation() !== null) {
-    marker.setAnimation(null);
-  } else {
-    marker.setAnimation(google.maps.Animation.BOUNCE);
-  }
+/*  animate the marker with a bounce and set a time out on the animation
+	marker - the marker to act on
+*/
+function animate(marker) {
+	marker.setAnimation(google.maps.Animation.BOUNCE);
+	stopAnimation(marker);
 }
 
-//display asked for markers on the google map
+/*  stop the marker from bouncing in set time
+	marker - the marker to act on
+*/
+function stopAnimation(marker) {
+    setTimeout(function () {
+        marker.setAnimation(null);
+    }, 2000);
+}
+
+/*  display asked for markers on the google map
+	markersArray - the array of markers to be displayed
+*/
 function displayMarkers(markersArray) {
 	// this clears the google map array of markers
 	clearMarkers();
@@ -130,43 +135,13 @@ function displayMarkers(markersArray) {
 	}
 }
 
-// clear all markers on the google map by setting them to null
+/*  clear all markers on the google map by setting them to null
+*/
 function clearMarkers() {
 	for (var i = 0; i < markers.length; i++) {
 		markers[i].setMap(null);
 	}
 	markers = [];
-}
-
-// get an array of markers of the requested type
-// from the allMarkers array populated by our yelp call
-function getVisibleMarkers() {
-	var visibleMarkers = [];
-	var len = allMarkers.length;
-	for (var i = 0; i < len; i++) {
-		var marker = allMarkers[i];
-		if (marker.visible) {
-			visibleMarkers.push(marker);
-		}
-	}
-	return visibleMarkers;
-}
-
-// get the array of markers with the requested name and type
-// from allMarkers array populated by our yelp call
-function getVisibleMarkersByPOI(name) {
-	var poiMarkers = [];
-	var len = allMarkers.length;
-	for (var i = 0; i < len; i++) {
-		var marker = allMarkers[i];
-		if (marker.name == name) {
-			marker.visible = true;
-			poiMarkers.push(marker);
-		} else {
-			marker.visible = false;
-		}
-	}
-	return poiMarkers;
 }
 
 // consumer key for yelp
@@ -226,44 +201,6 @@ function handleYelpData(data) {
 	console.log("this is good!");
 	if (results.length > 0) {
 		//build the successful data to be sent back from the first result
-		/*
-		display_phone: "+1-312-440-1500"
-		id: "warwick-allerton-hotel-chicago-chicago-3"
-		image_url: "http://s3-media3.fl.yelpcdn.com/bphoto/iaJuS6ehDXXvbzq27M85Zg/ms.jpg"
-		is_claimed: true
-		is_closed: false
-		location: Object
-		address: Array[1]
-		city: "Chicago"
-		coordinate: Object
-		latitude: 41.895154
-		longitude: -87.623928
-		__proto__: Object
-		country_code: "US"
-		cross_streets: "Superior St & Huron St"
-		display_address: Array[3]
-		0: "701 N Michigan Ave"
-		1: "Near North Side"
-		2: "Chicago, IL 60611"
-		length: 3
-		__proto__: Array[0]
-		geo_accuracy: 9.5
-		neighborhoods: Array[2]
-		postal_code: "60611"
-		state_code: "IL"
-		__proto__: Object
-		mobile_url: "http://m.yelp.com/biz/warwick-allerton-hotel-chicago-chicago-3"
-		name: "Warwick Allerton Hotel Chicago"
-		phone: "3124401500"
-		rating: 3.5
-		rating_img_url: "http://s3-media1.fl.yelpcdn.com/assets/2/www/img/5ef3eb3cb162/ico/stars/v1/stars_3_half.png"
-		rating_img_url_large: "http://s3-media3.fl.yelpcdn.com/assets/2/www/img/bd9b7a815d1b/ico/stars/v1/stars_large_3_half.png"
-		rating_img_url_small: "http://s3-media1.fl.yelpcdn.com/assets/2/www/img/2e909d5d3536/ico/stars/v1/stars_small_3_half.png"
-		review_count: 259
-		snippet_image_url: "http://s3-media3.fl.yelpcdn.com/photo/8r8s6-tKCAbEPrRSyeOVuQ/ms.jpg"
-		snippet_text: "Location, location, location! The Warwick Allerton is nestled along the Magnificent Mile, on the corner of Michigan and East Huron. While many reviewers..."
-		url: "http://www.yelp.com/biz/warwick-allerton-hotel-chicago-chicago-3"
-		*/
 		var business = data.businesses[0];
 		var name = business.name;
 		var lat = business.location.coordinate.latitude;
@@ -301,7 +238,7 @@ function handleYelpData(data) {
 	}
 }
 
-	// all the data to be displayed by the markers
+// all the points of interest in our neighbourhood map to be displayed by the markers
 var locations = [
 	{ name: "The Drake Hotel", visible: "true" },
 	{ name: "Park Hyatt Chicago", visible: "true" },
@@ -334,6 +271,9 @@ var locations = [
 	{ name: "Foodlife", visible: "true" }
 ];
 
+/*  display the infowindow for the item clicked on in the list
+	name - the name of point of interest
+*/
 function displayInfoWindow(name) {
 	console.log("name = " + name);
 	for (var i = 0; i < allMarkers.length; i++) {
@@ -390,6 +330,7 @@ $(document).ready(function() {
     var numData = locations.length;
     for (var i = 0; i < numData; i++) {
     	var currentData = locations[i];
+    	// call Yelp api to get data for the infowindow
     	callYelp(currentData.name);
     }
 });
