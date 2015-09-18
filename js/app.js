@@ -41,7 +41,7 @@ function initMap() {
 	var path = new google.maps.Polyline({
 	    path: neighborhoodCoordinates,
 	    geodesic: true,
-	    strokeColor: '#FF69B4',
+	    strokeColor: '#1414c0',
 	    strokeOpacity: 1.0,
 	    strokeWeight: 2
 	});
@@ -300,15 +300,17 @@ var viewModel = {
 	// credit: http://opensoul.org/2011/06/23/live-search-with-knockoutjs/
 	search: function(value) {
 		//console.log("value = " + value);
-		//if (value == '') return;
-		viewModel.yelps.removeAll();
+		clearMarkers();
+        viewModel.yelps.removeAll();
         viewModel.locations.removeAll();
-        clearMarkers();
         for(var x in locations) {
-			if(locations[x].name.toLowerCase().indexOf(value.toLowerCase()) >= 0) {
+        	var n = locations[x].name.toLowerCase();
+			if(n.indexOf(value.toLowerCase()) >= 0) {
+
 				viewModel.locations.push(locations[x]);
-				var n = locations[x].name.toLowerCase();
+
 				var numMarkers = allMarkers.length;
+
 				for (var i = 0; i < numMarkers; i++) {
 					if (allMarkers[i].name.toLowerCase() === n) {
 						viewModel.yelps.push(allMarkers[i]);

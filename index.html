@@ -38,16 +38,18 @@
         </div>
 
         <div class="col-md-3">
-
-          <input placeholder="Search…" type="text" class="search-text"
+          <form>
+            <input placeholder="Search…" type="text" class="search-text"
               data-bind="value: query, valueUpdate: 'keyup'" autocomplete="off">
+          <form>
 
-              <br><br><br>
-            <ul data-bind="foreach: locations">
-                <li>
-                  <a href="#" data-bind="text: name, click: $parent.infoWindow"></a>
+          <br><br><br>
+          <div>
+            <ul data-bind="foreach: { data: locations, as: 'location' } ">
+                <li><a data-bind="text: name, click: $parent.infoWindow"></a>
                 </li>
             </ul>
+          </div>
         </div>
 
       </div>
