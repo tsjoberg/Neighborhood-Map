@@ -28,14 +28,14 @@ body {
     margin-right: 2px;
     border-style: inset;
     border-width: 1px;
-	border-color: #FF69B4;
+	border-color: #1414c0;
 	margin-bottom: 3px;
 }
 
 .header {
 	font-family: verdana;
 	font-size: 20px;
-	color: #FF69B4;
+	color: #1414c0;
 	text-align: center;
 	width: 100%;
 }
@@ -60,8 +60,8 @@ input {
 
 input:focus {
     outline: none;
-    border-color: #FF69B4;
-    box-shadow:0 0 10px #FF69B4;
+    border-color: #1414c0;
+    box-shadow:0 0 10px #1414c0;
 }
 
 /* style for info window on marker*/

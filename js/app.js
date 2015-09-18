@@ -347,9 +347,9 @@ function displayInfoWindow(name) {
 // our view model for knockout js
 var viewModel = {
 
-	yelps: ko.observableArray(allMarkers),
+	yelps: ko.observableArray([]),
 
-	places: ko.observableArray(locations),
+	locations: ko.observableArray([]),
 
 	infoWindow: function(item) {
 		displayInfoWindow(item.name.toLowerCase());
@@ -359,24 +359,26 @@ var viewModel = {
 
 	// credit: http://opensoul.org/2011/06/23/live-search-with-knockoutjs/
 	search: function(value) {
+		console.log("value = " + value);
+		//if (value == '') return;
 		viewModel.yelps.removeAll();
-        var originalLocations = viewModel.places.removeAll();
+        viewModel.locations.removeAll();
         clearMarkers();
 		//console.log("locations array = " + originalLocations);
-        for(var x in originalLocations) {
-          if(originalLocations[x].name.toLowerCase().indexOf(value.toLowerCase()) >= 0) {
-            viewModel.places.push(originalLocations[x]);
-            var n = originalLocations[x].name.toLowerCase();
-            var numMarkers = allMarkers.length;
-            for (var i = 0; i < numMarkers; i++) {
-            	if (allMarkers[i].name.toLowerCase() === n) {
-            		viewModel.yelps.push(allMarkers[i]);
-            		displayMarker(allMarkers[i], false);
-            	}
-            }
-          }
+        for(var x in locations) {
+			if(locations[x].name.toLowerCase().indexOf(value.toLowerCase()) >= 0) {
+				viewModel.locations.push(locations[x]);
+				var n = locations[x].name.toLowerCase();
+				var numMarkers = allMarkers.length;
+				for (var i = 0; i < numMarkers; i++) {
+					if (allMarkers[i].name.toLowerCase() === n) {
+						viewModel.yelps.push(allMarkers[i]);
+						displayMarker(allMarkers[i], false);
+					}
+				}
+			}
         }
-      }
+    }
 };
 
 viewModel.query.subscribe(viewModel.search);
