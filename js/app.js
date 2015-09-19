@@ -288,8 +288,9 @@ function displayInfoWindow(name) {
 var viewModel = {
 
 	yelps: ko.observableArray([]),
-
-	locations: ko.observableArray([]),
+	// credit: @mcs forum mentor for suggesting to use a copy of locations thusly
+	// using the original wipes locations out everywhere! Thank you mcs!!
+	locations: ko.observableArray(locations.slice(0)),
 
 	infoWindow: function(item) {
 		displayInfoWindow(item.name.toLowerCase());
@@ -306,11 +307,8 @@ var viewModel = {
         for(var x in locations) {
         	var n = locations[x].name.toLowerCase();
 			if(n.indexOf(value.toLowerCase()) >= 0) {
-
 				viewModel.locations.push(locations[x]);
-
 				var numMarkers = allMarkers.length;
-
 				for (var i = 0; i < numMarkers; i++) {
 					if (allMarkers[i].name.toLowerCase() === n) {
 						viewModel.yelps.push(allMarkers[i]);
