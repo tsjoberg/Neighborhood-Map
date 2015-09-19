@@ -186,7 +186,7 @@ function callYelp(business) {
 		'dataType': 'jsonp',
 		'success': handleYelpData
 		}).fail(function(XMLHttpRequest, status, error) {
-			console.log("Yelp! Yelp! Error from YELP!  " + business);
+			alert("Yelp! Yelp! Error from YELP! : could not retrieve Yelp data");
 	});
 }
 
@@ -336,27 +336,31 @@ $(document).ready(function() {
     callWeatherUnderground();
 });
 
-
+/*  AJAX call to Weather Underground API to get weather conditions
+	for the City of Chicago
+*/
 function callWeatherUnderground() {
 	$.ajax({
 		url : "http://api.wunderground.com/api/117f669b717366bc/geolookup/conditions/q/IA/Chicago.json",
 		dataType : "jsonp",
 		success : handleWeatherUnderground
 	}).fail(function(XMLHttpRequest, status, error) {
-			console.log("Could not get Chicago weather report");
+		alert("Could not get Chicago weather report");
 	});
 }
 
+/*  Handle the response from weather underground ajax call by appending the
+	results to our html object #wu-weather to display on the header
+*/
 function handleWeatherUnderground(data) {
-	console.log("temp = " + data['current_observation']['temp_f']);
 	var $weather = $("#wu-weather");
-	//console.log($weather);
-	$weather.append('<span><b>Temperature: </b>'
-		+ data['current_observation']['temp_f']
-		+ '<b> F </b>, '
-		+ '<b> Wind: </b>'
-		+ data['current_observation']['wind_string']
-		+ '<b>, Current Conditions: </b>'
-		+ data['current_observation']['weather']
-		+ '</span>');
+	$weather.append('<span><b>Temperature: </b>' +
+		data['current_observation']['temperature_string'] +
+		' <b> Feels like:  </b>' +
+		data['current_observation']['feelslike_string'] +
+		'<b> Wind: </b>' +
+		data['current_observation']['wind_string'] +
+		' <b> Current Conditions: </b>' +
+		data['current_observation']['weather'] +
+		'</span>');
 }
