@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- HTML file for the frogger application      -->
-<!-- Frontend Web Developer Nanodegree, Udacity -->
-<!-- Project 3                                  -->
-<!-- @date Aug 30th, 2015                       -->
-<!-- @author Samata Bulusu                      -->
+<!-- HTML file for the Neighborhood Map application      -->
+<!-- Frontend Web Developer Nanodegree, Udacity          -->
+<!-- Project 3                                           -->
+<!-- @date Aug 30th, 2015                                -->
+<!-- @author Samata Bulusu                               -->
 <html>
   <head>
     <title>The Magnificent Mile</title>
@@ -22,7 +22,10 @@
         <span>The Magnificent Mile, Chicago</span>
       </div>
       <div class="row weather" id="wu-weather">
-        <label></label>
+        <b>Temperature: </b><span data-bind="text: temperature"></span>
+        <b>Feels like: </b><span data-bind="text: feelsLike"></span>
+        <b>Wind: </b><span data-bind="text: wind"></span>
+        <b>Current Conditions: </b><span data-bind="text:conditions"></span>
       </div>
       <hr class="ruler">
       <div class="row">
@@ -30,17 +33,17 @@
           <div id="map" class="row map-style"></div>
             <script src="js/knockout-3.3.0.js"></script>
             <script src="https://maps.googleapis.com/maps/api/js?callback=initMap"></script>
-            <script src="js/app.js"></script>
+            <script src="js/refactored-app.js"></script>
         </div>
         <div class="col-md-3">
           <form>
             <input placeholder="Search…" type="text" class="search-text"
               data-bind="value: query, valueUpdate: 'keyup'" autocomplete="off">
-          <form>
+          </form>
           <br><br><br>
           <div>
-            <ul data-bind="foreach: { data: locations, as: 'location' } ">
-                <li><a data-bind="text: location.name, click: $parent.infoWindow"></a>
+            <ul data-bind="foreach: locations">
+                <li><a data-bind="text: name, click: $parent.listViewClick"></a>
                 </li>
             </ul>
           </div>
