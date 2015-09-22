@@ -95,7 +95,7 @@ var accessor = {
 };
 
 /*  yelp api call
-	@param business = the name of the business to query
+    @param business = the name of the business to query
 */
 function callYelp(business) {
     var parameters = [];
@@ -135,8 +135,8 @@ function handleYelpData(data) {
     var results = data.businesses;
     // if we have data, we will display only the first review from yelp
     if (results.length > 0) {
-    	// create a new location object and push it to view models
-    	// observable array 'locations'
+        // create a new location object and push it to view models
+        // observable array 'locations'
         var mapLocation = new Location(results[0]);
         viewModel.locations.push(mapLocation);
     } else {
@@ -158,8 +158,8 @@ function callWeatherUnderground() {
 }
 
 /*  Handle the response from weather underground ajax call
-	by setting knockout observable values
-	@param data = response from ajax call
+    by setting knockout observable values
+    @param data = response from ajax call
 */
 function handleWeatherUnderground(data) {
     viewModel.temperature(data.current_observation.temperature_string);
@@ -169,7 +169,7 @@ function handleWeatherUnderground(data) {
 }
 
 /*  Opens a location's info window and animates its marker
-	@param locationData = the location object
+    @param locationData = the location object
 */
 function openInfoWindow(locationData) {
     if (viewModel.infoWindow !== undefined && viewModel.infoWindow !== null) {
@@ -202,7 +202,7 @@ function openInfoWindow(locationData) {
 }
 
 /*  Constructor for map location
-	@param business - response from yelp api call
+    @param business - response from yelp api call
 */
 function Location(business) {
     var self = this;
@@ -217,8 +217,8 @@ function Location(business) {
     this.imageUrl = business.image_url;
     this.rating = business.rating;
     this.snippetText = business.snippet_text;
-    this.address = business.location.display_address[0] + "<br>"
-                     + business.location.display_address[business.location.display_address.length - 1];
+    this.address = business.location.display_address[0] + "<br>" +
+                     business.location.display_address[business.location.display_address.length - 1];
 
     // save the marker as part of each location object
     this.marker = new google.maps.Marker({
@@ -272,7 +272,7 @@ var NBViewModel = function() {
     // click event on the location's marker that opens an infowindow
     self.listViewClick = function(locationObject) {
         google.maps.event.trigger(locationObject.marker, 'click');
-    }
+    };
 
     // observable to hold temperature data from weather ajax call
     self.temperature = ko.observable();
@@ -285,7 +285,7 @@ var NBViewModel = function() {
 
     // observable to hold conditions data from weather ajax call
     self.conditions = ko.observable();
-}
+};
 
 // create a new instance of the view model
 var viewModel = new NBViewModel();
