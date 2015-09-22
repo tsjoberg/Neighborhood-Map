@@ -14,7 +14,7 @@
 // handle to the google map
 var map;
 
-// all the points of interest in our neighbourhood map to be displayed by the markers
+// all the points of interest in our neighborhood map to be displayed by the markers
 var pointsOfInterest = [
     "The Drake Hotel",
     "Park Hyatt Chicago",
@@ -94,7 +94,9 @@ var accessor = {
   tokenSecret: tokenSecret
 };
 
-// yelp api call
+/*  yelp api call
+	@param business = the name of the business to query
+*/
 function callYelp(business) {
     var parameters = [];
     parameters.push(['term', business]);
@@ -125,12 +127,16 @@ function callYelp(business) {
     });
 }
 
-// callback function that handles yelp data
-// to populate our markers with
+/*  callback function that handles yelp data
+    to populate our markers with
+    @param data = response from ajax call
+ */
 function handleYelpData(data) {
     var results = data.businesses;
-
+    // if we have data, we will display only the first review from yelp
     if (results.length > 0) {
+    	// create a new location object and push it to view models
+    	// observable array 'locations'
         var mapLocation = new Location(results[0]);
         viewModel.locations.push(mapLocation);
     } else {
@@ -152,6 +158,8 @@ function callWeatherUnderground() {
 }
 
 /*  Handle the response from weather underground ajax call
+	by setting knockout observable values
+	@param data = response from ajax call
 */
 function handleWeatherUnderground(data) {
     viewModel.temperature(data.current_observation.temperature_string);
@@ -160,6 +168,9 @@ function handleWeatherUnderground(data) {
     viewModel.conditions(data.current_observation.weather);
 }
 
+/*  Opens a location's info window and animates its marker
+	@param locationData = the location object
+*/
 function openInfoWindow(locationData) {
     if (viewModel.infoWindow !== undefined && viewModel.infoWindow !== null) {
         // close the open window
@@ -190,6 +201,9 @@ function openInfoWindow(locationData) {
     }, 2000);
 }
 
+/*  Constructor for map location
+	@param business - response from yelp api call
+*/
 function Location(business) {
     var self = this;
 
@@ -206,6 +220,7 @@ function Location(business) {
     this.address = business.location.display_address[0] + "<br>"
                      + business.location.display_address[business.location.display_address.length - 1];
 
+    // save the marker as part of each location object
     this.marker = new google.maps.Marker({
         position: new google.maps.LatLng(self.lat, self.lng),
         map: map,
@@ -213,13 +228,17 @@ function Location(business) {
         title: self.name
     });
 
+    // create an event listener to call when marker is clicked
     google.maps.event.addListener(self.marker, 'click', function() {
         openInfoWindow(self);
     });
 
+    // special knockout property to automatically hide this location in list view
+    // when set to true
     this._destroy = ko.observable(false);
 }
 
+// View model for knockout js
 var NBViewModel = function() {
     var self = this;
 
@@ -244,27 +263,35 @@ var NBViewModel = function() {
         }
     };
 
+    // run self.search when user types in the search box
     self.query.subscribe(function(value) {
         self.search();
     });
 
+    // when user clicks a location in the list view, triggers a
+    // click event on the location's marker that opens an infowindow
     self.listViewClick = function(locationObject) {
         google.maps.event.trigger(locationObject.marker, 'click');
     }
 
+    // observable to hold temperature data from weather ajax call
     self.temperature = ko.observable();
 
+    // observable to hold feelslike data from weather ajax call
     self.feelsLike = ko.observable();
 
+    // observable to hold wind data from weather ajax call
     self.wind = ko.observable();
 
+    // observable to hold conditions data from weather ajax call
     self.conditions = ko.observable();
 }
 
+// create a new instance of the view model
 var viewModel = new NBViewModel();
 
 $(document).ready(function() {
-    // apply the knockout bindings
+    // apply the knockout bindings to the view model instance
     ko.applyBindings(viewModel);
 
     var numData = pointsOfInterest.length;
@@ -273,5 +300,6 @@ $(document).ready(function() {
         callYelp(pointsOfInterest[i]);
     }
 
+    // call Weather Underground api to get weather information
     callWeatherUnderground();
 });
